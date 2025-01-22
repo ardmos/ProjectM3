@@ -760,7 +760,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 620630468}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48a36de64038bbd40a387f820e7888c2, type: 3}
+  m_Script: {fileID: 11500000, guid: d71c838305ed55440a9a8f36e7aef059, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   targetScoreText: {fileID: 2108514350}
@@ -1329,7 +1329,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 986718153}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b56141986e4744443b2a0c6cbe19c408, type: 3}
+  m_Script: {fileID: 11500000, guid: 7f3615f5af524ce408f2c68a13f472c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   candyPrefab: {fileID: 3976075217577776643, guid: a76d032d19ea3cd4d9e2223b7775bbbf, type: 3}
@@ -1795,7 +1795,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1204279937}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b5231eff1f1ceb459feda07f26831ae, type: 3}
+  m_Script: {fileID: 11500000, guid: 4e33db71e9b85b94dbadd14d5a8adc37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1204279939
@@ -1883,11 +1883,11 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1965427251}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 100}
   m_SizeDelta: {x: 0, y: 100}
-  m_Pivot: {x: 0.5, y: 0}
+  m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1554242659
 MonoBehaviour:
   m_ObjectHideFlags: 0
