@@ -10,28 +10,32 @@ public class CandyGenerator : MonoBehaviour
     public RectTransform areaCandyGenerate;
     public float dropDuration = 0.5f; // 캔디가 떨어지는 시간
 
-    private Queue<(int column, int count)> candyQueue = new Queue<(int column, int count)>();
-
     private void Awake()
     {
         gameBoardManager.OnNeedCandy += GameBoardManager_OnNeedCandy;
     }
 
-    private void Update()
+    private void GameBoardManager_OnNeedCandy()
     {
-        if (candyQueue.Count > 0)
+        GenerateCandy();
+    }
+
+    private void GenerateCandy()
+    {
+        Debug.Log($"사탕 생성 시작!");
+        var candiesArray = gameBoardManager.GetCandiesArray();
+        for (int row = GameBoardManager.ROW_START_CREATE_AREA; row < GameBoardManager.TOTAL_ROW; row++)
         {
-            GenerateCandy(candyQueue.Dequeue());
+            for (int col = 0; col < GameBoardManager.TOTAL_COL; col++)
+            {
+                Debug.Log($"candiesArray[{row}, {col}]:{candiesArray[row, col]}");
+                if (candiesArray[row, col] == 0)
+                {
+                    // 사탕 생성!
+                    candiesArray[row, col] = 1;
+                    Debug.Log($"사탕 생성! row:{row}, col:{col}");
+                }
+            }
         }
-    }
-
-    private void GameBoardManager_OnNeedCandy(object sender, (int column, int count) e)
-    {
-        candyQueue.Enqueue(e);
-    }
-
-    private void GenerateCandy((int column, int count) candy)
-    {
-
     }
 }
