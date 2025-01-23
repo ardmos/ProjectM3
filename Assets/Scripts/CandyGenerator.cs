@@ -23,20 +23,24 @@ public class CandyGenerator : MonoBehaviour
     private void GenerateCandy()
     {
         Debug.Log($"사탕 생성 시작!");
-        (int candyNumber, GameObject candyObject)[,] candiesArray = gameBoardManager.GetCandiesArray();
+        GameBoardCell[,] gameBoardCells = gameBoardManager.GetGameBoardCellsArray();
         for (int row = GameBoardManager.ROW_START_CREATE_AREA; row < GameBoardManager.TOTAL_ROW; row++)
         {
             for (int col = 0; col < GameBoardManager.TOTAL_COL; col++)
             {
                 //Debug.Log($"candiesArray[{row}, {col}]:{candiesArray[row, col]}");
-                if (candiesArray[row, col].candyNumber == 0)
+                if (gameBoardCells[row, col].GetCandyNumber() == 0)
                 {
-                    // 사탕 생성!
-                    candiesArray[row, col].candyNumber = 1;
+                    // 사탕 생성! 
 
-                    GameObject newCandy = Instantiate(candyPrefab, gameBoardManager.GetCellRectTransform(row, col));
-                    candiesArray[row, col].candyObject = newCandy;
-                    //Debug.Log($"사탕 생성! row:{row}, col:{col}");
+                    // 생성 정보 등록(데이터상)
+                    gameBoardCells[row, col].SetCandyNumber(1); // 추후 랜덤생성은 이 값 수정
+                    GameObject newCandy = Instantiate(candyPrefab, gameBoardCells[row, col].GetRectTransform());
+                    gameBoardCells[row, col].SetCandyObject(newCandy);
+
+                    // 생성 정보 등록(게임월드)
+
+                    
                 }
             }
         }
