@@ -66,6 +66,7 @@ public class GameBoardManager : MonoBehaviour
     private IEnumerator DropCandies()
     {
         Debug.Log($"사탕 드랍 시작!");
+        yield return new WaitForSeconds(0.3f);
         for (int row=ROW_START_GAME_AREA; row<=ROW_END_GAME_AREA; row++)
         {
             for(int col=0; col<TOTAL_COL; col++)
@@ -84,7 +85,8 @@ public class GameBoardManager : MonoBehaviour
                 }
             }
         }
-        
+
+        yield return new WaitForSeconds(0.5f);
         // DropCandies의 모든 작업이 완료되면 생성 작업 시작
         CreateCandies();
     }

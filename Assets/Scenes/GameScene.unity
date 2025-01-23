@@ -1707,7 +1707,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f3615f5af524ce408f2c68a13f472c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  candyPrefab: {fileID: 3976075217577776643, guid: a76d032d19ea3cd4d9e2223b7775bbbf, type: 3}
+  candyPrefab:
+  - {fileID: 0}
+  - {fileID: 3976075217577776643, guid: a76d032d19ea3cd4d9e2223b7775bbbf, type: 3}
+  - {fileID: 3976075217577776643, guid: 41033b773f814cd458184fa322af444b, type: 3}
+  - {fileID: 3976075217577776643, guid: 30fdf33e20f30a34c985b2dee255f8f3, type: 3}
+  - {fileID: 3976075217577776643, guid: 8ffcf795478bcf545a88f5bf22d7e242, type: 3}
+  - {fileID: 3976075217577776643, guid: d1ca19861ffd4b640b5d96709ac226ed, type: 3}
+  - {fileID: 3976075217577776643, guid: 1db33205922103d4689459b0036411f8, type: 3}
+  - {fileID: 3976075217577776643, guid: d33589892dd352940965b02f74838e05, type: 3}
+  - {fileID: 3976075217577776643, guid: a98c95c025735284a8735d0665b0b868, type: 3}
+  - {fileID: 3976075217577776643, guid: 67e1093f89ab4cc46aba1d2185e6858f, type: 3}
+  - {fileID: 3976075217577776643, guid: 5c045f35b0733f5429991a83d36f6e06, type: 3}
   gameBoardManager: {fileID: 1204279938}
   areaCandyGenerate: {fileID: 1554242658}
   dropDuration: 0.5
