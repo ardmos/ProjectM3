@@ -23,17 +23,20 @@ public class CandyGenerator : MonoBehaviour
     private void GenerateCandy()
     {
         Debug.Log($"荤帕 积己 矫累!");
-        var candiesArray = gameBoardManager.GetCandiesArray();
+        (int candyNumber, GameObject candyObject)[,] candiesArray = gameBoardManager.GetCandiesArray();
         for (int row = GameBoardManager.ROW_START_CREATE_AREA; row < GameBoardManager.TOTAL_ROW; row++)
         {
             for (int col = 0; col < GameBoardManager.TOTAL_COL; col++)
             {
-                Debug.Log($"candiesArray[{row}, {col}]:{candiesArray[row, col]}");
-                if (candiesArray[row, col] == 0)
+                //Debug.Log($"candiesArray[{row}, {col}]:{candiesArray[row, col]}");
+                if (candiesArray[row, col].candyNumber == 0)
                 {
                     // 荤帕 积己!
-                    candiesArray[row, col] = 1;
-                    Debug.Log($"荤帕 积己! row:{row}, col:{col}");
+                    candiesArray[row, col].candyNumber = 1;
+
+                    GameObject newCandy = Instantiate(candyPrefab, gameBoardManager.GetCellRectTransform(row, col));
+                    candiesArray[row, col].candyObject = newCandy;
+                    //Debug.Log($"荤帕 积己! row:{row}, col:{col}");
                 }
             }
         }

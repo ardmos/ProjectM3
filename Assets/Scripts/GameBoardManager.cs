@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Runtime.CompilerServices;
@@ -21,9 +22,11 @@ public class GameBoardManager : MonoBehaviour
 
     public event Action OnNeedCandy;
 
-    private int[,] candiesArray = new int[TOTAL_ROW, TOTAL_COL];
-    private Text[,] candiesObjectsArray = new Text[TOTAL_ROW, TOTAL_COL];
-    public GameObject candiesParentsObjects;
+    // 데이터상에 존재하는 캔디 위치 정보 배열
+    private (int candyNumber, GameObject candyObject)[,] candiesArray = new (int, GameObject)[TOTAL_ROW, TOTAL_COL];
+    // 게임월드상에 존재하는 캔디 위치 배열
+    private Text[,] cells = new Text[TOTAL_ROW, TOTAL_COL];
+    public GameObject cellsParent;
 
     private void Start()
     {
@@ -32,7 +35,7 @@ public class GameBoardManager : MonoBehaviour
 
         PrintCandyArray();
         CreateCandies();
-        DropCandies();
+        StartCoroutine(DropCandies());
     }
 
     /// <summary>
@@ -41,13 +44,13 @@ public class GameBoardManager : MonoBehaviour
     private void InitCandiesObjectsArray()
     {
         //candiesParentsObjects
-        var childObjects = candiesParentsObjects.GetComponentsInChildren<Text>();
+        var childObjects = cellsParent.GetComponentsInChildren<Text>();
         int childArrayindex = 0;
         for (int row = TOTAL_ROW-1; row >= 0; row--)
         {
             for (int col = 0; col < TOTAL_COL; col++)
             {     
-                candiesObjectsArray[row, col] = childObjects[childArrayindex];
+                cells[row, col] = childObjects[childArrayindex];
                 childArrayindex++;
             }
         }
@@ -62,14 +65,14 @@ public class GameBoardManager : MonoBehaviour
     }
 
     // 1. 하단 게임 영역 _ 검색 및 위치 이동. 값이 0인 셀은 해당 열의 상단 요소들 값 중, 가장 가까운 0이 아닌 값과 위치 교환
-    private void DropCandies()
+    private IEnumerator DropCandies()
     {
         Debug.Log($"사탕 드랍 시작!");
         for (int row=ROW_START_GAME_AREA; row<=ROW_END_GAME_AREA; row++)
         {
             for(int col=0; col<TOTAL_COL; col++)
             {
-                if (candiesArray[row, col] == 0)
+                if (candiesArray[row, col].candyNumber == 0)
                 {
                     // 빈칸! 해당 열의 상단 요소들 중 가장 가까운 0이 아닌 값과 위치를 교환합니다.
                     var result = FindCandyInColumn(row, col);
@@ -77,15 +80,17 @@ public class GameBoardManager : MonoBehaviour
 
                     (int row, int col) closestCandyPos = result.pos;
 
-                    //Debug.Log($"빈칸! 해당 열의 상단 요소들 중 가장 가까운 0이 아닌 값과 위치를 교환합니다. ({row},{col}):{candyArray[row,col]} <-> ({closestCandyPos.row},{closestCandyPos.col}):{candyArray[closestCandyPos.row, closestCandyPos.col]}");
                     // 값 교환
-                    (candiesArray[row,col], candiesArray[closestCandyPos.row, closestCandyPos.col]) = (candiesArray[closestCandyPos.row, closestCandyPos.col], candiesArray[row, col]);
-                    //Debug.Log($"교환 결과. ({row},{col}):{candyArray[row, col]} / ({closestCandyPos.row},{closestCandyPos.col}):{candyArray[closestCandyPos.row, closestCandyPos.col]}");
+                    //Debug.Log($"빈칸! 해당 열의 상단 요소들 중 가장 가까운 0이 아닌 값과 위치를 교환합니다. ({row},{col}):{candiesArray[row, col]} <-> ({closestCandyPos.row},{closestCandyPos.col}):{candiesArray[closestCandyPos.row, closestCandyPos.col]}");
+                    yield return new WaitForSeconds(0.2f);
+                    // 위치 교대
+                    (candiesArray[row, col], candiesArray[closestCandyPos.row, closestCandyPos.col]) = (candiesArray[closestCandyPos.row, closestCandyPos.col], candiesArray[row, col]);
+                    //Debug.Log($"교환 결과. ({row},{col}):{candiesArray[row, col]} / ({closestCandyPos.row},{closestCandyPos.col}):{candiesArray[closestCandyPos.row, closestCandyPos.col]}");
+                    PrintCandyArray();
                 }
             }
         }
-        PrintCandyArray();
-
+        
         // DropCandies의 모든 작업이 완료되면 생성 작업 시작
         CreateCandies();
     }
@@ -101,7 +106,7 @@ public class GameBoardManager : MonoBehaviour
         Debug.Log($"빈칸 세로열 사탕 검색 시작!");
         for (int row = startRow; row < TOTAL_ROW; row++)
         {
-            if (candiesArray[row, col] != 0)
+            if (candiesArray[row, col].candyNumber != 0)
             {
                 // 빈칸이 아님! 위치 반환
                 return (true, (row, col));
@@ -111,7 +116,6 @@ public class GameBoardManager : MonoBehaviour
         // 실패. 
         return (false, (0, 0));
     }
-
 
     /// <summary>
     /// 전체 캔디 배열을 위에서부터 아래로 출력
@@ -124,11 +128,11 @@ public class GameBoardManager : MonoBehaviour
             string column = "(";
             for(int col=0; col < TOTAL_COL; col++)
             {
-                candiesObjectsArray[row, col].text = candiesArray[row, col].ToString();
+                cells[row, col].text = candiesArray[row, col].candyNumber.ToString();
                 if (col == TOTAL_COL-1)
-                    column += $"{candiesArray[row, col]}";
+                    column += $"{candiesArray[row, col].candyNumber}";
                 else
-                    column += $"{candiesArray[row, col]}, ";
+                    column += $"{candiesArray[row, col].candyNumber}, ";
 
             }
             column += ")";
@@ -137,8 +141,13 @@ public class GameBoardManager : MonoBehaviour
         Debug.Log("=============================================================");
     }
 
-    public int[,] GetCandiesArray()
+    public (int, GameObject)[,] GetCandiesArray()
     {
         return candiesArray;
+    }
+
+    public RectTransform GetCellRectTransform(int row, int col)
+    {
+        return cells[row, col].rectTransform;
     }
 }
