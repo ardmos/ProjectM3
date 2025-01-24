@@ -13,12 +13,13 @@ using UnityEngine.UI;
 /// </summary>
 public class GameBoardManager : MonoBehaviour
 {
-    public const int TOTAL_ROW = 10;    // TOTAL_ROW는 항상 짝수. 항상 게임 영역과 같은 수의 ROW를 가진 생성 영역이 존재하기 때문.
-    public const int TOTAL_COL = 5;    // 직사각형 구조이기 때문에 COL은 TOTAL_COL만 존재해도 충분.
+    public const int TOTAL_ROW = 10; // TOTAL_ROW는 항상 짝수. 항상 게임 영역과 같은 수의 ROW를 가진 생성 영역이 존재하기 때문.
+    public const int TOTAL_COL = 5; // 직사각형 구조이기 때문에 COL은 TOTAL_COL만 존재해도 충분.
     public const int ROW_END_CREATE_AREA = TOTAL_ROW - 1;
     public const int ROW_START_CREATE_AREA = TOTAL_ROW / 2;
     public const int ROW_END_GAME_AREA = ROW_START_CREATE_AREA - 1;
     public const int ROW_START_GAME_AREA = 0;
+    public const int MIN_MATCH = 3; // 최소 매치 개수
 
     public event Action OnNeedCandy;
 
@@ -33,7 +34,6 @@ public class GameBoardManager : MonoBehaviour
 
         PrintCandyArray();
         CreateCandies();
-        StartCoroutine(DropCandies());
     }
 
     /// <summary>
@@ -60,9 +60,71 @@ public class GameBoardManager : MonoBehaviour
         OnNeedCandy.Invoke();
 
         PrintCandyArray();
+
+        // CreateCandies가 완료되면 GAME AREA의 매치여부를 체크함 
+        CheckMatches();
     }
 
-    // 1. 하단 게임 영역 _ 검색 및 위치 이동. 값이 0인 셀은 해당 열의 상단 요소들 값 중, 가장 가까운 0이 아닌 값과 위치 교환
+    /// <summary>
+    /// 1. 매치 확인 & 제거
+    /// </summary>
+    private void CheckMatches()
+    {
+        List<GameBoardCell> matchedCandies = new List<GameBoardCell>();
+
+        // 수평 검사
+        for (int row = ROW_START_GAME_AREA; row <= ROW_END_GAME_AREA; row++)
+        {
+            for (int col = 0; col < TOTAL_COL-2; col++)
+            {
+                GameBoardCell candy1 = gameBoardCells[row, col];
+                GameBoardCell candy2 = gameBoardCells[row, col+1];
+                GameBoardCell candy3 = gameBoardCells[row, col+2];
+
+                if( candy1.GetCandyNumber() == candy2.GetCandyNumber() && candy2.GetCandyNumber() == candy3.GetCandyNumber())
+                {
+                    matchedCandies.AddRange(new[] { candy1, candy2, candy3 });
+                }
+            }
+        }
+
+        // 수직 검사
+        for (int col = 0; col < TOTAL_COL; col++)
+        {
+            for (int row = ROW_START_GAME_AREA; row <= ROW_END_GAME_AREA-2; row++)
+            {
+                GameBoardCell candy1 = gameBoardCells[row, col];
+                GameBoardCell candy2 = gameBoardCells[row+1, col];
+                GameBoardCell candy3 = gameBoardCells[row+2, col];
+
+                if (candy1.GetCandyNumber() == candy2.GetCandyNumber() && candy2.GetCandyNumber() == candy3.GetCandyNumber())
+                {
+                    matchedCandies.AddRange(new[] { candy1, candy2, candy3 });
+                }
+            }
+        }
+
+        // 매치 캔디들 제거
+        PopMatches(matchedCandies);
+    }
+
+    /// <summary>
+    /// 매치 캔디들 제거
+    /// </summary>
+    private void PopMatches(List<GameBoardCell> matchedCandies)
+    {
+        Debug.Log($"사탕 Pop!");
+        foreach (GameBoardCell candy in matchedCandies)
+        {
+            candy.PopCandy();
+        }
+
+        // Pop 이후 Drop작업 시작
+        StartCoroutine(DropCandies());
+    }
+
+    
+    // 2. 하단 게임 영역 _ 빈 칸 탐색 및 위치 이동. 값이 0인 셀은 해당 열의 상단 요소들 값 중, 가장 가까운 0이 아닌 값과 위치 교환
     private IEnumerator DropCandies()
     {
         Debug.Log($"사탕 드랍 시작!");
@@ -71,8 +133,10 @@ public class GameBoardManager : MonoBehaviour
         {
             for(int col=0; col<TOTAL_COL; col++)
             {
+                // 빈 곳 확인
                 if (gameBoardCells[row, col].GetCandyNumber() == 0)
                 {
+                    Debug.Log($"빈 칸 발견! {row},{col}");
                     yield return new WaitForSeconds(0.1f);
 
                     var result = FindCandyInColumn(row, col);
@@ -136,7 +200,6 @@ public class GameBoardManager : MonoBehaviour
     /// <returns>실패시 success를 false로 반환합니다</returns>
     private (bool success, (int row, int col) pos) FindCandyInColumn(int startRow, int col)
     {
-        Debug.Log($"빈칸 세로열 사탕 검색 시작!");
         for (int row = startRow; row < TOTAL_ROW; row++)
         {
             if (gameBoardCells[row, col].GetCandyNumber() != 0)

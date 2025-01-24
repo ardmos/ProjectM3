@@ -19,6 +19,14 @@ public class GameBoardCell : MonoBehaviour
         candyNumberTextUI = GetComponent<Text>();
     }
 
+    // 캔디 터트리기
+    public void PopCandy()
+    {
+        candyNumber = 0;
+        Destroy(candyObject);
+        candyObject = null;
+    }
+
     public int GetCandyNumber() {  return candyNumber; }
     public Text GetCandyNumberText() { return candyNumberTextUI; }
     public GameObject GetCandyObject() { return candyObject; }
