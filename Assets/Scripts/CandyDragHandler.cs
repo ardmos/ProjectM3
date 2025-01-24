@@ -1,21 +1,24 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using DG.Tweening;
-using System.Collections;
 
-public class CandyDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class CandyDragHandler : MonoBehaviour
 {
     public float dragThreshold = 30f; // 드래그로 인식할 최소 거리
 
+    public static CandyDragHandler Instance;
     public GameBoardManager gameBoardManager;
 
     private GameBoardCell[,] gameBoardCells;
     private Vector2 dragStartPosition;
     private Candy draggedCandy;
-    private bool isSwapping = false;
+    [SerializeField] private bool isSwapping = false;
 
-    void Start()
+    private void Awake()
+    {
+        Instance = this;
+    }
+
+    private void Start()
     {
         gameBoardCells = gameBoardManager.GetGameBoardCellsArray();
     }
@@ -26,11 +29,8 @@ public class CandyDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
 
         dragStartPosition = eventData.position;
         draggedCandy = eventData.pointerCurrentRaycast.gameObject?.GetComponent<Candy>();
-    }
 
-    public void OnDrag(PointerEventData eventData)
-    {
-        // 드래그 중에는 아무 것도 하지 않습니다.
+        Debug.Log($"dragStartPosition:{dragStartPosition}, eventData.pointerCurrentRaycast.gameObject:{eventData.pointerCurrentRaycast.gameObject}, draggedCandy:{draggedCandy}");
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -54,17 +54,17 @@ public class CandyDragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, 
     {
         if (Mathf.Abs(dragVector.x) > Mathf.Abs(dragVector.y))
         {
-            return dragVector.x > 0 ? Vector2.right : Vector2.left;
+            return dragVector.x > 0 ? Vector2.up : Vector2.down;
         }
         else
         {
-            return dragVector.y > 0 ? Vector2.up : Vector2.down;
+            return dragVector.y > 0 ? Vector2.right : Vector2.left;
         }
     }
 
     private Vector2 GetCandyGridPosition(RectTransform candyRectTransform)
     {
-        for (int x = GameBoardManager.ROW_START_GAME_AREA; x < GameBoardManager.ROW_END_GAME_AREA; x++)
+        for (int x = GameBoardManager.ROW_START_GAME_AREA; x <= GameBoardManager.ROW_END_GAME_AREA; x++)
         {
             for (int y = 0; y < GameBoardManager.TOTAL_COL; y++)
             {

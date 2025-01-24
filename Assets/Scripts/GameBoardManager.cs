@@ -178,12 +178,10 @@ public class GameBoardManager : MonoBehaviour
         // 데이터 갱신
         targetCell.SetCandyObject(sourceCell.GetCandyObject());
         targetCell.SetCandyNumber(sourceCell.GetCandyNumber());
-        targetCell.SetCandyNumberText(sourceCell.GetCandyNumber());
 
         // 원본 셀 초기화
         sourceCell.SetCandyObject(null);
         sourceCell.SetCandyNumber(0);
-        sourceCell.SetCandyNumberText(0);
 
         // 필요한 경우 애니메이션 추가
         //StartCoroutine(AnimateCandyMove(candyRect, startAnchoredPos, endAnchoredPos));
@@ -203,18 +201,21 @@ public class GameBoardManager : MonoBehaviour
 
         if (sourceCell == null || targetCell == null) yield break;
 
-        var tempSourceCell = new GameBoardCell(gameBoardCells[fromRow, fromCol]);
+        GameObject tempSourceCellObj = new GameObject("tempSourceCellObj");
+        tempSourceCellObj.AddComponent<GameBoardCell>();
+        var tempSourceCell = tempSourceCellObj.GetComponent<GameBoardCell>();
+        tempSourceCell.SetNewGameBoardCellData(sourceCell);
 
-        var candy1 = sourceCell.GetCandyObject();
-        var candy2 = targetCell.GetCandyObject();
+        var sourceCandy = sourceCell.GetCandyObject();
+        var targetCandy = targetCell.GetCandyObject();
 
         // 캔디 오브젝트 이동
-        Vector3 tempPosition = candy1.GetRectTransform().localPosition;
-        sourceCell.GetCandyObject().GetRectTransform().DOLocalMove(candy2.GetRectTransform().localPosition, SWAP_DURATION);
-        yield return candy2.GetRectTransform().DOLocalMove(tempPosition, SWAP_DURATION).WaitForCompletion();
+        Vector3 tempPosition = sourceCandy.GetRectTransform().localPosition;
+        sourceCandy.GetRectTransform().DOLocalMove(targetCandy.GetRectTransform().localPosition, SWAP_DURATION);
+        yield return targetCandy.GetRectTransform().DOLocalMove(tempPosition, SWAP_DURATION).WaitForCompletion();
 
-        candy1.GetComponent<RectTransform>().SetParent(targetCell.GetRectTransform(), false);
-        candy2.GetComponent<RectTransform>().SetParent(tempSourceCell.GetRectTransform(), false);
+        sourceCandy.GetComponent<RectTransform>().SetParent(targetCell.GetRectTransform(), false);
+        targetCandy.GetComponent<RectTransform>().SetParent(sourceCell.GetRectTransform(), false);
 
         // 데이터 갱신
         sourceCell.SetNewGameBoardCellData(targetCell);
@@ -271,7 +272,6 @@ public class GameBoardManager : MonoBehaviour
             string column = "(";
             for (int col = 0; col < TOTAL_COL; col++)
             {
-                gameBoardCells[row, col].SetCandyNumberText(gameBoardCells[row, col].GetCandyNumber());
                 if (col == TOTAL_COL - 1)
                     column += $"{gameBoardCells[row, col].GetCandyNumber()}";
                 else

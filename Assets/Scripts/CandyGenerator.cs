@@ -7,8 +7,6 @@ public class CandyGenerator : MonoBehaviour
 {
     public GameObject[] candyPrefab;
     public GameBoardManager gameBoardManager;
-    public RectTransform areaCandyGenerate;
-    public float dropDuration = 0.5f; // Äµµğ°¡ ¶³¾îÁö´Â ½Ã°£
 
     private void Awake()
     {
