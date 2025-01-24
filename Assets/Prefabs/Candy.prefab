@@ -10,9 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6658645118205074547}
   - component: {fileID: 7290878855908958232}
+  - component: {fileID: -6492765300987895858}
   - component: {fileID: 3657765978418011741}
   - component: {fileID: 5959852950961554403}
-  - component: {fileID: -6492765300987895858}
   m_Layer: 0
   m_Name: Candy
   m_TagString: Untagged
@@ -49,6 +49,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f899812e6e76a7f458990eb1ecb77053, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-6492765300987895858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3976075217577776643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 261ffa21b02c26d43afb21087fa85988, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!222 &3657765978418011741
@@ -89,15 +101,3 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &-6492765300987895858
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3976075217577776643}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 261ffa21b02c26d43afb21087fa85988, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
