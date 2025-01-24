@@ -4,15 +4,13 @@ using UnityEngine;
 
 public class Candy : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public void SelfDestroy()
     {
-        
+        Destroy(gameObject);
     }
 
-    // Update is called once per frame
-    void Update()
+    public RectTransform GetRectTransform()
     {
-        
+        return GetComponent<RectTransform>();
     }
 }

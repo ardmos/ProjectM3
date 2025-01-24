@@ -1,7 +1,9 @@
+using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,6 +22,8 @@ public class GameBoardManager : MonoBehaviour
     public const int ROW_END_GAME_AREA = ROW_START_CREATE_AREA - 1;
     public const int ROW_START_GAME_AREA = 0;
     public const int MIN_MATCH = 3; // 최소 매치 개수
+
+    public const float SWAP_DURATION = 0.3f;
 
     public event Action OnNeedCandy;
 
@@ -44,10 +48,10 @@ public class GameBoardManager : MonoBehaviour
         //candiesParentsObjects
         var cells = cellsParent.GetComponentsInChildren<GameBoardCell>();
         int childArrayindex = 0;
-        for (int row = TOTAL_ROW-1; row >= 0; row--)
+        for (int row = TOTAL_ROW - 1; row >= 0; row--)
         {
             for (int col = 0; col < TOTAL_COL; col++)
-            {     
+            {
                 gameBoardCells[row, col] = cells[childArrayindex];
                 childArrayindex++;
             }
@@ -68,20 +72,20 @@ public class GameBoardManager : MonoBehaviour
     /// <summary>
     /// 1. 매치 확인 & 제거
     /// </summary>
-    private void CheckMatches()
+    public void CheckMatches()
     {
         List<GameBoardCell> matchedCandies = new List<GameBoardCell>();
 
         // 수평 검사
         for (int row = ROW_START_GAME_AREA; row <= ROW_END_GAME_AREA; row++)
         {
-            for (int col = 0; col < TOTAL_COL-2; col++)
+            for (int col = 0; col < TOTAL_COL - 2; col++)
             {
                 GameBoardCell candy1 = gameBoardCells[row, col];
-                GameBoardCell candy2 = gameBoardCells[row, col+1];
-                GameBoardCell candy3 = gameBoardCells[row, col+2];
+                GameBoardCell candy2 = gameBoardCells[row, col + 1];
+                GameBoardCell candy3 = gameBoardCells[row, col + 2];
 
-                if( candy1.GetCandyNumber() == candy2.GetCandyNumber() && candy2.GetCandyNumber() == candy3.GetCandyNumber())
+                if (candy1.GetCandyNumber() != 0 && candy1.GetCandyNumber() == candy2.GetCandyNumber() && candy2.GetCandyNumber() == candy3.GetCandyNumber())
                 {
                     matchedCandies.AddRange(new[] { candy1, candy2, candy3 });
                 }
@@ -91,13 +95,13 @@ public class GameBoardManager : MonoBehaviour
         // 수직 검사
         for (int col = 0; col < TOTAL_COL; col++)
         {
-            for (int row = ROW_START_GAME_AREA; row <= ROW_END_GAME_AREA-2; row++)
+            for (int row = ROW_START_GAME_AREA; row <= ROW_END_GAME_AREA - 2; row++)
             {
                 GameBoardCell candy1 = gameBoardCells[row, col];
-                GameBoardCell candy2 = gameBoardCells[row+1, col];
-                GameBoardCell candy3 = gameBoardCells[row+2, col];
+                GameBoardCell candy2 = gameBoardCells[row + 1, col];
+                GameBoardCell candy3 = gameBoardCells[row + 2, col];
 
-                if (candy1.GetCandyNumber() == candy2.GetCandyNumber() && candy2.GetCandyNumber() == candy3.GetCandyNumber())
+                if (candy1.GetCandyNumber() != 0 && candy1.GetCandyNumber() == candy2.GetCandyNumber() && candy2.GetCandyNumber() == candy3.GetCandyNumber())
                 {
                     matchedCandies.AddRange(new[] { candy1, candy2, candy3 });
                 }
@@ -105,7 +109,7 @@ public class GameBoardManager : MonoBehaviour
         }
 
         // 매치 캔디들 제거
-        PopMatches(matchedCandies);
+        PopMatches(matchedCandies.Distinct().ToList());
     }
 
     /// <summary>
@@ -113,30 +117,33 @@ public class GameBoardManager : MonoBehaviour
     /// </summary>
     private void PopMatches(List<GameBoardCell> matchedCandies)
     {
-        Debug.Log($"사탕 Pop!");
-        foreach (GameBoardCell candy in matchedCandies)
+        Debug.Log($"matchedCandies.Count:{matchedCandies.Count}");
+        // 매치된 캔디가 있는만큼 제거
+        foreach (GameBoardCell gameBoardCell in matchedCandies)
         {
-            candy.PopCandy();
+            gameBoardCell.PopCandy();
         }
 
-        // Pop 이후 Drop작업 시작
+        //이후 Drop작업 시작
         StartCoroutine(DropCandies());
     }
 
-    
+
     // 2. 하단 게임 영역 _ 빈 칸 탐색 및 위치 이동. 값이 0인 셀은 해당 열의 상단 요소들 값 중, 가장 가까운 0이 아닌 값과 위치 교환
     private IEnumerator DropCandies()
     {
+        int moveCount = 0;
+
         Debug.Log($"사탕 드랍 시작!");
         yield return new WaitForSeconds(0.3f);
-        for (int row=ROW_START_GAME_AREA; row<=ROW_END_GAME_AREA; row++)
+        for (int row = ROW_START_GAME_AREA; row <= ROW_END_GAME_AREA; row++)
         {
-            for(int col=0; col<TOTAL_COL; col++)
+            for (int col = 0; col < TOTAL_COL; col++)
             {
                 // 빈 곳 확인
                 if (gameBoardCells[row, col].GetCandyNumber() == 0)
                 {
-                    Debug.Log($"빈 칸 발견! {row},{col}");
+                    //Debug.Log($"빈 칸 발견! {row},{col}");
                     yield return new WaitForSeconds(0.1f);
 
                     var result = FindCandyInColumn(row, col);
@@ -146,13 +153,18 @@ public class GameBoardManager : MonoBehaviour
 
                     // 캔디 이동
                     MoveCandy(sourceRow, sourceCol, row, col);
+                    moveCount++;
                 }
             }
         }
 
         yield return new WaitForSeconds(0.5f);
-        // DropCandies의 모든 작업이 완료되면 생성 작업 시작
-        CreateCandies();
+
+        if (moveCount > 0)
+        {
+            // DropCandies의 모든 작업이 완료되면 생성 작업 시작
+            CreateCandies();
+        }
     }
 
     private void MoveCandy(int fromRow, int fromCol, int toRow, int toCol)
@@ -175,6 +187,41 @@ public class GameBoardManager : MonoBehaviour
 
         // 필요한 경우 애니메이션 추가
         //StartCoroutine(AnimateCandyMove(candyRect, startAnchoredPos, endAnchoredPos));
+    }
+
+    /// <summary>
+    /// 캔디 위치 교대
+    /// </summary>
+    /// <param name="fromRow"></param>
+    /// <param name="fromCol"></param>
+    /// <param name="toRow"></param>
+    /// <param name="toCol"></param>
+    public IEnumerator SwapCandies(int fromRow, int fromCol, int toRow, int toCol)
+    {
+        var sourceCell = gameBoardCells[fromRow, fromCol];
+        var targetCell = gameBoardCells[toRow, toCol];
+
+        if (sourceCell == null || targetCell == null) yield break;
+
+        var tempSourceCell = new GameBoardCell(gameBoardCells[fromRow, fromCol]);
+
+        var candy1 = sourceCell.GetCandyObject();
+        var candy2 = targetCell.GetCandyObject();
+
+        // 캔디 오브젝트 이동
+        Vector3 tempPosition = candy1.GetRectTransform().localPosition;
+        sourceCell.GetCandyObject().GetRectTransform().DOLocalMove(candy2.GetRectTransform().localPosition, SWAP_DURATION);
+        yield return candy2.GetRectTransform().DOLocalMove(tempPosition, SWAP_DURATION).WaitForCompletion();
+
+        candy1.GetComponent<RectTransform>().SetParent(targetCell.GetRectTransform(), false);
+        candy2.GetComponent<RectTransform>().SetParent(tempSourceCell.GetRectTransform(), false);
+
+        // 데이터 갱신
+        sourceCell.SetNewGameBoardCellData(targetCell);
+        targetCell.SetNewGameBoardCellData(tempSourceCell);
+
+        // 스왑 이후 매치 확인
+        CheckMatches();
     }
 
     // 캔디 이동 애니메이션 (필요한 경우)
@@ -219,13 +266,13 @@ public class GameBoardManager : MonoBehaviour
     private void PrintCandyArray()
     {
         Debug.Log("=============================================================");
-        for(int row = TOTAL_ROW-1;row >= 0; row--)
+        for (int row = TOTAL_ROW - 1; row >= 0; row--)
         {
             string column = "(";
-            for(int col=0; col < TOTAL_COL; col++)
+            for (int col = 0; col < TOTAL_COL; col++)
             {
                 gameBoardCells[row, col].SetCandyNumberText(gameBoardCells[row, col].GetCandyNumber());
-                if (col == TOTAL_COL-1)
+                if (col == TOTAL_COL - 1)
                     column += $"{gameBoardCells[row, col].GetCandyNumber()}";
                 else
                     column += $"{gameBoardCells[row, col].GetCandyNumber()}, ";

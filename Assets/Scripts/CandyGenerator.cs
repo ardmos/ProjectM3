@@ -20,6 +20,7 @@ public class CandyGenerator : MonoBehaviour
         GenerateCandy();
     }
 
+    // 사탕 생성 영역에 빈곳이 있으면 사탕을 생성합니다.
     private void GenerateCandy()
     {
         Debug.Log($"사탕 생성 시작!");
@@ -28,14 +29,15 @@ public class CandyGenerator : MonoBehaviour
         {
             for (int col = 0; col < GameBoardManager.TOTAL_COL; col++)
             {
-                //Debug.Log($"candiesArray[{row}, {col}]:{candiesArray[row, col]}");
+                // 빈 곳 발견!
                 if (gameBoardCells[row, col].GetCandyNumber() == 0)
                 {
                     // 사탕 생성! 
-                    int ranNum = Random.Range(1, candyPrefab.Length);
+                    //int ranNum = Random.Range(1, candyPrefab.Length);
+                    int ranNum = Random.Range(1, 4);
                     gameBoardCells[row, col].SetCandyNumber(ranNum);
                     GameObject newCandy = Instantiate(candyPrefab[ranNum], gameBoardCells[row, col].GetRectTransform());
-                    gameBoardCells[row, col].SetCandyObject(newCandy);
+                    gameBoardCells[row, col].SetCandyObject(newCandy.GetComponent<Candy>());
                 }
             }
         }

@@ -10,28 +10,48 @@ using UnityEngine.UI;
 /// </summary>
 public class GameBoardCell : MonoBehaviour
 {
-    [SerializeField] private Text candyNumberTextUI;
+    [SerializeField] private Text candyNumberTextUI; // µð¹ö±ë¿ë
     [SerializeField] private int candyNumber;
-    [SerializeField] private GameObject candyObject;
+    [SerializeField] private Candy candyObject;
+
+    public GameBoardCell(GameBoardCell other)
+    {
+        this.candyNumberTextUI = other.candyNumberTextUI;
+        this.candyNumber = other.candyNumber;
+        this.candyObject = other.candyObject;
+    }
 
     private void Awake()
     {
         candyNumberTextUI = GetComponent<Text>();
     }
 
+    public void SetNewGameBoardCellData(GameBoardCell other)
+    {
+        this.candyNumber = other.candyNumber;
+        this.candyObject = other.candyObject;
+
+        SetCandyNumberText(this.candyNumber); // µð¹ö±ë¿ë
+    }
+
     // Äµµð ÅÍÆ®¸®±â
     public void PopCandy()
     {
+        if(candyObject == null) {
+            Debug.Log($"PopCandy().candyObject is null");
+        }
+
+        Debug.Log($"»çÅÁ Pop!");
         candyNumber = 0;
-        Destroy(candyObject);
+        candyObject.SelfDestroy();
         candyObject = null;
     }
 
     public int GetCandyNumber() {  return candyNumber; }
     public Text GetCandyNumberText() { return candyNumberTextUI; }
-    public GameObject GetCandyObject() { return candyObject; }
+    public Candy GetCandyObject() { return candyObject; }
     public RectTransform GetRectTransform() { return GetComponent<RectTransform>(); }
     public void SetCandyNumber(int candyNumber) { this.candyNumber = candyNumber; }
-    public void SetCandyNumberText(int candyNumber) { candyNumberTextUI.text = candyNumber.ToString(); }
-    public void SetCandyObject(GameObject obj) { candyObject = obj; }
+    public void SetCandyNumberText(int candyNumber) { candyNumberTextUI.text = candyNumber.ToString(); } // µð¹ö±ë¿ë
+    public void SetCandyObject(Candy obj) { candyObject = obj; }
 }
