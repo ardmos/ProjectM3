@@ -13,8 +13,8 @@ using UnityEngine.UI;
 /// </summary>
 public class GameBoardManager : MonoBehaviour
 {
-    public const int TOTAL_ROW = 6;    // TOTAL_ROW는 항상 짝수. 항상 게임 영역과 같은 수의 ROW를 가진 생성 영역이 존재하기 때문.
-    public const int TOTAL_COL = 3;    // 직사각형 구조이기 때문에 COL은 TOTAL_COL만 존재해도 충분.
+    public const int TOTAL_ROW = 10;    // TOTAL_ROW는 항상 짝수. 항상 게임 영역과 같은 수의 ROW를 가진 생성 영역이 존재하기 때문.
+    public const int TOTAL_COL = 5;    // 직사각형 구조이기 때문에 COL은 TOTAL_COL만 존재해도 충분.
     public const int ROW_END_CREATE_AREA = TOTAL_ROW - 1;
     public const int ROW_START_CREATE_AREA = TOTAL_ROW / 2;
     public const int ROW_END_GAME_AREA = ROW_START_CREATE_AREA - 1;
@@ -73,7 +73,7 @@ public class GameBoardManager : MonoBehaviour
             {
                 if (gameBoardCells[row, col].GetCandyNumber() == 0)
                 {
-                    yield return new WaitForSeconds(0.2f);
+                    yield return new WaitForSeconds(0.1f);
 
                     var result = FindCandyInColumn(row, col);
                     if (!result.success) continue;

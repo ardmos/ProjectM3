@@ -33,15 +33,9 @@ public class CandyGenerator : MonoBehaviour
                 {
                     // 사탕 생성! 
                     int ranNum = Random.Range(1, candyPrefab.Length);
-
-                    // 생성 정보 등록(데이터상)
                     gameBoardCells[row, col].SetCandyNumber(ranNum);
                     GameObject newCandy = Instantiate(candyPrefab[ranNum], gameBoardCells[row, col].GetRectTransform());
                     gameBoardCells[row, col].SetCandyObject(newCandy);
-
-                    // 생성 정보 등록(게임월드)
-
-
                 }
             }
         }
