@@ -31,8 +31,7 @@ public class CandyGenerator : MonoBehaviour
                 if (gameBoardCells[row, col].GetCandyNumber() == 0)
                 {
                     // »çÅÁ »ý¼º! 
-                    //int ranNum = Random.Range(1, candyPrefab.Length);
-                    int ranNum = Random.Range(1, 4);
+                    int ranNum = Random.Range(1, candyPrefab.Length);
                     gameBoardCells[row, col].SetCandyNumber(ranNum);
                     GameObject newCandy = Instantiate(candyPrefab[ranNum], gameBoardCells[row, col].GetRectTransform());
                     gameBoardCells[row, col].SetCandyObject(newCandy.GetComponent<Candy>());
