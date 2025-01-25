@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -25,14 +26,23 @@ public class GameBoardCell:MonoBehaviour
     // ƒµµ ≈Õ∆Æ∏Æ±‚
     public void PopCandy()
     {
-        if(candyObject == null) {
-            Debug.Log($"PopCandy().candyObject is null");
-        }
+        try
+        {
+            if (candyObject == null)
+            {
+                Debug.Log($"PopCandy().candyObject is null");
+            }
 
-        Debug.Log($"ªÁ≈¡ Pop!");
-        candyNumber = 0;
-        candyObject.SelfDestroy();
-        candyObject = null;
+            candyObject.SelfDestroy(success => {
+                Debug.Log($"ªÁ≈¡ Pop!");
+                candyNumber = 0;
+                candyObject = null;
+            });
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.Message);
+        }
     }
 
     public int GetCandyNumber() {  return candyNumber; }

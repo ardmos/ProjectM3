@@ -31,6 +31,9 @@ public class GameBoardManager : MonoBehaviour
     private GameBoardCell[,] gameBoardCells = new GameBoardCell[TOTAL_ROW, TOTAL_COL];
     public GameObject cellsParent;
 
+    public MoveCountManager moveCountManager;
+    public ScoreManager scoreManager;
+
     private void Start()
     {
         // GameObject[,] candiesObjectsArray 초기화
@@ -121,6 +124,8 @@ public class GameBoardManager : MonoBehaviour
         // 매치된 캔디가 있는만큼 제거
         foreach (GameBoardCell gameBoardCell in matchedCandies)
         {
+            // 제거되는 캔디들 점수로 등록
+            scoreManager.AddCurrentScore(gameBoardCell.GetCandyObject().GetScore());
             gameBoardCell.PopCandy();
         }
 
@@ -220,6 +225,11 @@ public class GameBoardManager : MonoBehaviour
         // 데이터 갱신
         sourceCell.SetNewGameBoardCellData(targetCell);
         targetCell.SetNewGameBoardCellData(tempSourceCell);
+
+        Destroy(tempSourceCellObj);
+
+        // 스왑 동작 카운트 증가
+        moveCountManager.IncreaseMoveCount();
 
         // 스왑 이후 매치 확인
         CheckMatches();

@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    public Text targetScoreText;
-    public Text moveCountText;
-    public Text currentScoreText;
+    [SerializeField] private Text targetScoreText;
+    [SerializeField] private Text moveCountText;
+    [SerializeField] private Text currentScoreText;
 
     public void SetTargetScore(int score)
     {
