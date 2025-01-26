@@ -5,40 +5,5 @@ using DG.Tweening; // DoTween 네임스페이스 추가
 
 public class CandyGenerator : MonoBehaviour
 {
-    public const int CANDY_TYPES_COUNT_STAGE1 = 5;
 
-    public GameObject[] candyPrefab;
-    public GameBoardManager gameBoardManager;
-
-    private void Awake()
-    {
-        gameBoardManager.OnNeedCandy += GameBoardManager_OnNeedCandy;
-    }
-
-    private void GameBoardManager_OnNeedCandy()
-    {
-        GenerateCandy();
-    }
-
-    // 사탕 생성 영역에 빈곳이 있으면 사탕을 생성합니다.
-    private void GenerateCandy()
-    {
-        Debug.Log($"사탕 생성 시작!");
-        GameBoardCell[,] gameBoardCells = gameBoardManager.GetGameBoardCellsArray();
-        for (int row = GameBoardManager.ROW_START_CREATE_AREA; row < GameBoardManager.TOTAL_ROW; row++)
-        {
-            for (int col = 0; col < GameBoardManager.TOTAL_COL; col++)
-            {
-                // 빈 곳 발견!
-                if (gameBoardCells[row, col].GetCandyNumber() == 0)
-                {
-                    // 사탕 생성! 
-                    int ranNum = Random.Range(1, CANDY_TYPES_COUNT_STAGE1); // 스테이지1 기준. 5종류 캔디 등장
-                    gameBoardCells[row, col].SetCandyNumber(ranNum);
-                    GameObject newCandy = Instantiate(candyPrefab[ranNum], gameBoardManager.GetCellsParent());
-                    gameBoardCells[row, col].SetCandyObject(newCandy.GetComponent<Candy>());
-                }
-            }
-        }
-    }
 }

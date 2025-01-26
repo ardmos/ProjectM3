@@ -7,7 +7,7 @@ public class CandyDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 {
     public void OnBeginDrag(PointerEventData eventData)
     {
-        CandyDragHandler.Instance.OnBeginDrag(eventData);
+        //CandyDragHandler.Instance.OnBeginDrag(eventData);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -17,6 +17,6 @@ public class CandyDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IE
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        CandyDragHandler.Instance.OnEndDrag(eventData);
+        //CandyDragHandler.Instance.OnEndDrag(eventData);
     }
 }

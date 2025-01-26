@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 public class CandyDragHandler : MonoBehaviour
 {
-    public float dragThreshold = 30f; // 드래그로 인식할 최소 거리
+/*    public float dragThreshold = 30f; // 드래그로 인식할 최소 거리
 
     public static CandyDragHandler Instance;
     public GameBoardManager gameBoardManager;
@@ -90,5 +90,5 @@ public class CandyDragHandler : MonoBehaviour
         StartCoroutine(gameBoardManager.SwapCandies((int)pos1.x, (int)pos1.y, (int)pos2.x, (int)pos2.y));
 
         isSwapping = false;
-    }
+    }*/
 }

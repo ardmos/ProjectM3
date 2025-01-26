@@ -6,6 +6,10 @@ using UnityEngine.EventSystems;
 
 public class Candy : MonoBehaviour
 {
+    public Vector3Int CurrentIndex => m_CurrentIndex;
+    protected Vector3Int m_CurrentIndex;
+
+
     //public int candyNumber;
     private int score = 10;
 
@@ -22,4 +26,10 @@ public class Candy : MonoBehaviour
     }
 
     public int GetScore() {  return score; }
+
+
+    public virtual void Init(Vector3Int startIdx)
+    {
+        m_CurrentIndex = startIdx;
+    }
 }
