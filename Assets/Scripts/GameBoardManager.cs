@@ -16,20 +16,17 @@ public class GameBoardManager : MonoBehaviour
 {
     public static GameBoardManager Instance;
 
-    public Grid Grid; // Tilemap의 부모 그리드
+    public List<Vector3Int> SpawnerPosition = new();
     public Dictionary<Vector3Int, GameBoardCell> CellContent = new();
     public Candy[] ExistingCandies;
 
+    public Grid Grid => m_Grid; // Tilemap의 부모 그리드
+    private Grid m_Grid;
 
     private void Awake()
     {
         Instance = this;
     }
-
-
-
-
-
 
     /// <summary>
     ///  Candy Placer Tile로부터 배치 셀을 생성하도록 호출되는 메서드입니다.
@@ -38,7 +35,6 @@ public class GameBoardManager : MonoBehaviour
     /// <param name="startingCandy"></param>
     public static void RegisterCell(Vector3Int cellPosition, Candy startingCandy = null)
     {
-        //Not super happy with that, but Startup is called before all Awake....
         if (Instance == null)
         {
             Instance = GameObject.Find("GameBoardManager").GetComponent<GameBoardManager>();
@@ -53,7 +49,7 @@ public class GameBoardManager : MonoBehaviour
 
     private void GetReference()
     {
-        Grid = GameObject.Find("Grid").GetComponent<Grid>();
+        m_Grid = GameObject.Find("Grid").GetComponent<Grid>();
     }
 
     /// <summary>
@@ -88,5 +84,16 @@ public class GameBoardManager : MonoBehaviour
         candy.Init(cell);
 
         return candy;
+    }
+
+    public static void RegisterSpawner(Vector3Int cell)
+    {
+        if (Instance == null)
+        {
+            Instance = GameObject.Find("GameBoardManager").GetComponent<GameBoardManager>();
+            Instance.GetReference();
+        }
+
+        Instance.SpawnerPosition.Add(cell);
     }
 }
