@@ -9,7 +9,6 @@ public class ScoreManager : MonoBehaviour
 {
     public const int TARGET_SCORE_STAGE1 = 150;
 
-    [SerializeField] private Text targetScoreText;
     [SerializeField] private int targetScore = 0;
 
     [SerializeField] private TextMeshProUGUI currentScoreText;
@@ -18,7 +17,6 @@ public class ScoreManager : MonoBehaviour
     private void Start()
     {
         targetScore = TARGET_SCORE_STAGE1;
-        //targetScoreText.text = $"Target: {targetScore}";
     }
 
     public void AddCurrentScore(int value)
@@ -35,7 +33,7 @@ public class ScoreManager : MonoBehaviour
         if (currentScore >= targetScore)
         {
             // 스테이지 클리어!
-            GameManager.Instance.SetGameState(GameManager.GameState.Win);
+            GameManager.Instance.SetGameState(GameManager.State.Win);
         }
     }
 

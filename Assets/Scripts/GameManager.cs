@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public enum GameState
+    public enum State
     {
         Ready,
         Play,
@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     public event Action OnWin;
     public event Action OnLose;
 
-    [SerializeField] private GameState gameState = GameState.Ready;
+    [SerializeField] private State gameState = State.Ready;
 
     private void Awake()
     {
@@ -30,33 +30,34 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         // 시작하자마자 터지는것들 스코어 포함 안시키려면 여기서 처리해줘야함
-        SetGameState(GameState.Play);
+        SetGameState(State.Play);
     }
 
-    public void SetGameState(GameState newState)
+    public void SetGameState(State newState)
     {
         gameState = newState;
 
         RunStateMachine();
     }
 
-    public GameState GetGameState() => gameState;
+    public State GetGameState() => gameState;
 
     private void RunStateMachine()
     {
         switch (gameState)
         {
-            case GameState.Ready:
+            case State.Ready:
                 break;
-            case GameState.Play:
+            case State.Play:
                 break;
-            case GameState.Win:
+            case State.Win:
                 OnWin.Invoke();
                 // 게임 정지 
 
                 // 승리 팝업 
                 break;
-            case GameState.Lose:
+            case State.Lose:
+                OnLose.Invoke(); // Lose시 동작 아직 미구현
                 break;
             default:
                 Debug.LogError($"유효한 게임 스테이트가 아닙니다.");

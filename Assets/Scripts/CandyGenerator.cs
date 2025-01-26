@@ -35,7 +35,7 @@ public class CandyGenerator : MonoBehaviour
                     // 사탕 생성! 
                     int ranNum = Random.Range(1, CANDY_TYPES_COUNT_STAGE1); // 스테이지1 기준. 5종류 캔디 등장
                     gameBoardCells[row, col].SetCandyNumber(ranNum);
-                    GameObject newCandy = Instantiate(candyPrefab[ranNum], gameBoardCells[row, col].GetRectTransform());
+                    GameObject newCandy = Instantiate(candyPrefab[ranNum], gameBoardManager.GetCellsParent());
                     gameBoardCells[row, col].SetCandyObject(newCandy.GetComponent<Candy>());
                 }
             }

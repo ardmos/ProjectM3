@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,7 +30,7 @@ public class GameBoardManager : MonoBehaviour
 
     // 각 셀에 캔디 정보를 담고있는 게임보드 셀 배열
     private GameBoardCell[,] gameBoardCells = new GameBoardCell[TOTAL_ROW, TOTAL_COL];
-    public GameObject cellsParent;
+    [SerializeField] private GameObject cellsParent;
 
     public MoveCountManager moveCountManager;
     public ScoreManager scoreManager;
@@ -141,23 +142,24 @@ public class GameBoardManager : MonoBehaviour
 
         Debug.Log($"사탕 드랍 시작!");
         yield return new WaitForSeconds(0.3f);
-        for (int row = ROW_START_GAME_AREA; row <= ROW_END_GAME_AREA; row++)
+        for (int targetRow = ROW_START_GAME_AREA; targetRow <= ROW_END_GAME_AREA; targetRow++)
         {
-            for (int col = 0; col < TOTAL_COL; col++)
+            for (int targetCol = 0; targetCol < TOTAL_COL; targetCol++)
             {
                 // 빈 곳 확인
-                if (gameBoardCells[row, col].GetCandyNumber() == 0)
+                if (gameBoardCells[targetRow, targetCol].GetCandyNumber() == 0)
                 {
                     //Debug.Log($"빈 칸 발견! {row},{col}");
                     yield return new WaitForSeconds(0.1f);
 
-                    var result = FindCandyInColumn(row, col);
+                    var result = FindCandyInColumn(targetRow, targetCol);
                     if (!result.success) continue;
 
                     (int sourceRow, int sourceCol) = result.pos;
 
                     // 캔디 이동
-                    MoveCandy(sourceRow, sourceCol, row, col);
+                    //MoveCandy(sourceRow, sourceCol, targetRow, targetCol);
+                    StartCoroutine(MoveCandyWithAnimation(sourceRow, sourceCol, targetRow, targetCol));
                     moveCount++;
                 }
             }
@@ -187,9 +189,37 @@ public class GameBoardManager : MonoBehaviour
         // 원본 셀 초기화
         sourceCell.SetCandyObject(null);
         sourceCell.SetCandyNumber(0);
+    }
 
-        // 필요한 경우 애니메이션 추가
-        //StartCoroutine(AnimateCandyMove(candyRect, startAnchoredPos, endAnchoredPos));
+    private IEnumerator MoveCandyWithAnimation(int fromRow, int fromCol, int toRow, int toCol)
+    {
+        float moveDuration = 0.3f; // 이동 애니메이션 지속 시간
+
+        var sourceCell = gameBoardCells[fromRow, fromCol];
+        var targetCell = gameBoardCells[toRow, toCol];
+
+        RectTransform candyRect = sourceCell.GetCandyObject().GetComponent<RectTransform>();
+        //candyRect.SetParent(cellsParent.GetComponent<RectTransform>(), false);
+        Vector2 endPosition = targetCell.GetRectTransform().anchoredPosition;
+
+        // 애니메이션 시작
+        Tween moveTween = candyRect.DOAnchorPos(endPosition, moveDuration).SetEase(Ease.OutQuad); // 이동 곡선 설정
+
+        yield return moveTween.WaitForCompletion();
+
+        // 애니메이션 완료 후 부모 변경
+        //candyRect.SetParent(targetCell.GetRectTransform(), false);
+        //candyRect.anchoredPosition = Vector2.zero; // 로컬 위치 리셋
+        //candyRect.anchorMin = new Vector2(0.5f, 0.5f);
+        //candyRect.anchorMax = new Vector2(0.5f, 0.5f);
+
+        // 데이터 갱신
+        targetCell.SetCandyObject(sourceCell.GetCandyObject());
+        targetCell.SetCandyNumber(sourceCell.GetCandyNumber());
+
+        // 원본 셀 초기화
+        sourceCell.SetCandyObject(null);
+        sourceCell.SetCandyNumber(0);
     }
 
     /// <summary>
@@ -219,8 +249,8 @@ public class GameBoardManager : MonoBehaviour
         sourceCandy.GetRectTransform().DOLocalMove(targetCandy.GetRectTransform().localPosition, SWAP_DURATION);
         yield return targetCandy.GetRectTransform().DOLocalMove(tempPosition, SWAP_DURATION).WaitForCompletion();
 
-        sourceCandy.GetComponent<RectTransform>().SetParent(targetCell.GetRectTransform(), false);
-        targetCandy.GetComponent<RectTransform>().SetParent(sourceCell.GetRectTransform(), false);
+        //sourceCandy.GetComponent<RectTransform>().SetParent(targetCell.GetRectTransform(), false);
+        //targetCandy.GetComponent<RectTransform>().SetParent(sourceCell.GetRectTransform(), false);
 
         // 데이터 갱신
         sourceCell.SetNewGameBoardCellData(targetCell);
@@ -233,20 +263,6 @@ public class GameBoardManager : MonoBehaviour
 
         // 스왑 이후 매치 확인
         CheckMatches();
-    }
-
-    // 캔디 이동 애니메이션 (필요한 경우)
-    private IEnumerator AnimateCandyMove(RectTransform candyRect, Vector2 startAnchoredPos, Vector2 endAnchoredPos)
-    {
-        float animationTime = 0.2f;
-
-        for (float t = 0; t < animationTime; t += Time.deltaTime)
-        {
-            candyRect.anchoredPosition = Vector2.Lerp(startAnchoredPos, endAnchoredPos, t / animationTime);
-            yield return null;
-        }
-
-        candyRect.anchoredPosition = endAnchoredPos;
     }
 
 
@@ -298,4 +314,6 @@ public class GameBoardManager : MonoBehaviour
     {
         return gameBoardCells;
     }
+
+    public RectTransform GetCellsParent() { return cellsParent.GetComponent<RectTransform>(); }
 }
