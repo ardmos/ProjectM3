@@ -9,8 +9,8 @@ public class Candy : MonoBehaviour
     public Vector3Int CurrentIndex => m_CurrentIndex;
     protected Vector3Int m_CurrentIndex;
 
+    public int CandyType;
 
-    //public int candyNumber;
     private int score = 10;
 
     public void SelfDestroy(Action<bool> callback)
