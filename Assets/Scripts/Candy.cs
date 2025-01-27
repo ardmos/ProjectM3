@@ -1,32 +1,103 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class Candy : MonoBehaviour
 {
-    public Vector3Int CurrentIndex => m_CurrentIndex;
-    protected Vector3Int m_CurrentIndex;
+    public enum State
+    {
+        Still,
+        Falling,
+        Bouncing,
+        Disappearing
+    }
 
     public int CandyType;
 
-    private int score = 10;
+    public Sprite UISprite;
+    //When a gem get added to a match, this match get stored here so we can now if this gem is currently in a match and 
+    //cannot be used for anything else.
+    public Match CurrentMatch = null;
+    //this is set to sqrt(2) when falling in diagonal so the time of a diagonal fall is the same as a direct one
+    [HideInInspector]
+    public float SpeedMultiplier = 1.0f;
+    public State CurrentState => m_CurrentState;
+    public bool CanMove => m_CanMove && m_CurrentState is State.Still;
+    public Vector3Int CurrentIndex => m_CurrentIndex;
+    public bool Usable => m_Usable;
+    public bool Used => m_Used;
+    public float FallTime => m_FallTime;
+    public int HitPoint => m_HitPoints;
 
-    public void SelfDestroy(Action<bool> callback)
+    private State m_CurrentState = State.Still;
+
+    //If this is set to true, the Use function will be called when swapping or double clicking the gem.
+    //Not used in this base class, but useful for BonusGem.
+    protected bool m_Usable = false;
+    protected bool m_Used = false;
+    protected bool m_CanMove = true;
+    protected Vector3Int m_CurrentIndex;
+
+    protected int m_HitPoints = 1;
+
+    private float m_FallTime = 0.0f;
+
+
+    public virtual void Init(Vector3Int startIdx)
     {
-        Destroy(gameObject);
-
-        callback(true);
+        m_CurrentIndex = startIdx;
     }
 
-    public RectTransform GetRectTransform()
+    // Called when swapping a Gem that have its Usable set to true. SwappedGem will contains the other gem it was swiped
+    // with or null if that was a use triggered by a double click
+    //deleteSelf will be true in most case but is set to false when a bonus item is used. Bonus item just call Use on
+    //a "temporary" gem it hold, and that gem should not be deleted
+    public virtual void Use(Candy swappedCandy, bool isBonus = false)
     {
-        return GetComponent<RectTransform>();
+
     }
 
-    public int GetScore() {  return score; }
+    public virtual bool Damage(int damage)
+    {
+        m_HitPoints -= damage;
+        return m_HitPoints > 0;
+    }
 
+    public void MoveTo(Vector3Int newCell)
+    {
+        m_CurrentIndex = newCell;
+    }
+
+    public void StartMoveTimer()
+    {
+        m_FallTime = 0;
+
+        m_CurrentState = State.Falling;
+    }
+
+    public void TickMoveTimer(float deltaTime)
+    {
+        m_FallTime += deltaTime;
+    }
+
+    public void StopFalling()
+    {
+        m_CurrentState = State.Bouncing;
+        m_FallTime = 0;
+    }
+
+    public void StopBouncing()
+    {
+        m_CurrentState = State.Still;
+    }
+
+    public void Destroyed()
+    {
+        m_CurrentState = State.Disappearing;
+    }
 
     public virtual void Init(Vector3Int startIdx)
     {

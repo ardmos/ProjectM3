@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -15,6 +17,12 @@ using Random = UnityEngine.Random;
 [DefaultExecutionOrder(-9999)]
 public class GameBoardManager : MonoBehaviour
 {
+    public class PossibleSwap
+    {
+        public Vector3Int StartPosition;
+        public Vector3Int Direction;
+    }
+
     public static GameBoardManager Instance;
 
     public List<Vector3Int> SpawnerPosition = new();
@@ -23,7 +31,12 @@ public class GameBoardManager : MonoBehaviour
     
     public ScoreManager ScoreManager;
 
+    private List<Vector3Int> m_TickingCells = new();
+    private List<Vector3Int> m_NewTickingCells = new();
     private List<Vector3Int> m_CellToMatchCheck = new();
+    private List<Match> m_TickingMatch = new();
+    private List<PossibleSwap> m_PossibleSwaps = new();
+    private int m_PickedSwap;
 
     public Grid Grid => m_Grid; // Tilemap의 부모 그리드
     private Grid m_Grid;
@@ -31,8 +44,11 @@ public class GameBoardManager : MonoBehaviour
     private BoundsInt m_BoundsInt;
 
     private Dictionary<int, Candy> m_CandyLookup;
+    private Dictionary<Vector3Int, Action> m_CellsCallbacks = new();
+    private Dictionary<Vector3Int, Action> m_MatchedCallback = new();
 
     private bool m_BoardChanged = false;
+    private bool m_BoardWasInit = false;
 
     private void Awake()
     {
@@ -49,13 +65,15 @@ public class GameBoardManager : MonoBehaviour
         }
 
         GenerateBoard();
-        //FindAllPossibleMatch();
+        FindAllPossibleMatch();
 
-        //m_BoardWasInit = true;
+        m_BoardWasInit = true;
     }
 
     private void Update()
     {
+        if (!m_BoardWasInit)
+            return;
 
         if (m_CellToMatchCheck.Count > 0)
         {
@@ -66,7 +84,7 @@ public class GameBoardManager : MonoBehaviour
     }
 
     //generate a gem in every cell, making sure we don't have any match 
-    void GenerateBoard()
+    private void GenerateBoard()
     {
         m_BoundsInt = new BoundsInt();
         var listOfCells = CellContent.Keys.ToList();
@@ -226,14 +244,309 @@ public class GameBoardManager : MonoBehaviour
         }
     }
 
+    private void FindAllPossibleMatch()
+    {
+        //TODO : instead of going over every gems just do it on moved gems for optimization
+
+        m_PossibleSwaps.Clear();
+
+        //we use a double loop instead of directly querying the cells, so we access them in increasing x then y coordinate
+        //this allow to just have to test swapping upward then right, as down and left will have been tested by previous
+        //gem already
+
+        for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
+        {
+            for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
+            {
+                var idx = new Vector3Int(x, y, 0);
+                if (CellContent.TryGetValue(idx, out var cell) && cell.CanBeMoved)
+                {
+                    var topIdx = idx + Vector3Int.up;
+                    var rightIdx = idx + Vector3Int.right;
+
+                    if (CellContent.TryGetValue(topIdx, out var topCell) && topCell.CanBeMoved)
+                    {
+                        //swap the cell
+                        (CellContent[idx].ContainingCandy, CellContent[topIdx].ContainingCandy) = (
+                            CellContent[topIdx].ContainingCandy, CellContent[idx].ContainingCandy);
+
+                        if (DoCheck(topIdx, false))
+                        {
+                            m_PossibleSwaps.Add(new PossibleSwap()
+                            {
+                                StartPosition = idx,
+                                Direction = Vector3Int.up
+                            });
+                        }
+
+                        if (DoCheck(idx, false))
+                        {
+                            m_PossibleSwaps.Add(new PossibleSwap()
+                            {
+                                StartPosition = topIdx,
+                                Direction = Vector3Int.down
+                            });
+                        }
+
+                        //swap back
+                        (CellContent[idx].ContainingCandy, CellContent[topIdx].ContainingCandy) = (
+                            CellContent[topIdx].ContainingCandy, CellContent[idx].ContainingCandy);
+                    }
+
+                    if (CellContent.TryGetValue(rightIdx, out var rightCell) && rightCell.CanBeMoved)
+                    {
+                        //swap the cell
+                        (CellContent[idx].ContainingCandy, CellContent[rightIdx].ContainingCandy) = (
+                            CellContent[rightIdx].ContainingCandy, CellContent[idx].ContainingCandy);
+
+                        if (DoCheck(rightIdx, false))
+                        {
+                            m_PossibleSwaps.Add(new PossibleSwap()
+                            {
+                                StartPosition = idx,
+                                Direction = Vector3Int.right
+                            });
+                        }
+
+                        if (DoCheck(idx, false))
+                        {
+                            m_PossibleSwaps.Add(new PossibleSwap()
+                            {
+                                StartPosition = rightIdx,
+                                Direction = Vector3Int.left
+                            });
+                        }
+
+                        //swap back
+                        (CellContent[idx].ContainingCandy, CellContent[rightIdx].ContainingCandy) = (
+                            CellContent[rightIdx].ContainingCandy, CellContent[idx].ContainingCandy);
+                    }
+                }
+            }
+        }
+
+
+        m_PickedSwap = Random.Range(0, m_PossibleSwaps.Count);
+    }
+
+    /// <summary>
+    /// This will return true if a match was found. Setting createMatch to false allow to just check for existing match
+    /// which is used by the match finder to check for match possible by swipe 
+    /// </summary>
+    private bool DoCheck(Vector3Int startCell, bool createMatch = true)
+    {
+        // in the case we call this with an empty cell. Shouldn't happen, but let's be safe
+        if (!CellContent.TryGetValue(startCell, out var centerGem) || centerGem.ContainingCandy == null)
+            return false;
+
+        //we ignore that gem if it's already part of another match.
+        if (centerGem.ContainingCandy.CurrentMatch != null)
+            return false;
+
+        Vector3Int[] offsets = new[]
+        {
+                Vector3Int.up, Vector3Int.right, Vector3Int.down, Vector3Int.left
+            };
+
+        //First find all the connected gem of the same type
+        List<Vector3Int> gemList = new List<Vector3Int>();
+        List<Vector3Int> checkedCells = new();
+
+        Queue<Vector3Int> toCheck = new();
+        toCheck.Enqueue(startCell);
+
+        while (toCheck.Count > 0)
+        {
+            var current = toCheck.Dequeue();
+
+            gemList.Add(current);
+            checkedCells.Add(current);
+
+            foreach (var dir in offsets)
+            {
+                var nextCell = current + dir;
+
+                if (checkedCells.Contains(nextCell))
+                    continue;
+
+                if (CellContent.TryGetValue(current + dir, out var content)
+                    && content.CanMatch()
+                    && content.ContainingCandy.CurrentMatch == null
+                    && content.ContainingCandy.CandyType == centerGem.ContainingCandy.CandyType)
+                {
+                    toCheck.Enqueue(nextCell);
+                }
+            }
+        }
+
+        //-- now we build a list of all line of 3+ gems
+        List<Vector3Int> lineList = new();
+
+        foreach (var idx in gemList)
+        {
+            //for each dir (up/down/left/right) if there is no gem in that dir, that mean this could be the start of
+            //a matching line, so we check in the opposite direction till we have no more gem
+            foreach (var dir in offsets)
+            {
+                if (!gemList.Contains(idx + dir))
+                {
+                    var currentList = new List<Vector3Int>() { idx };
+                    var next = idx - dir;
+                    while (gemList.Contains(next))
+                    {
+                        currentList.Add(next);
+                        next -= dir;
+                    }
+
+                    if (currentList.Count >= 3)
+                    {
+                        lineList = currentList;
+                    }
+                }
+            }
+        }
+
+        //no lines match, so there is no match in that.
+        if (lineList.Count == 0)
+            return false;
+
+        if (createMatch)
+        {
+            var finalMatch = CreateCustomMatch(startCell);
+
+            foreach (var cell in lineList)
+            {
+                if (m_MatchedCallback.TryGetValue(cell, out var clbk))
+                    clbk.Invoke();
+
+                if (CellContent[cell].CanDelete())
+                    finalMatch.AddCandy(CellContent[cell].ContainingCandy);
+            }
+        }
+        return true;
+    }
+
     void DoMatchCheck()
     {
         foreach (var cell in m_CellToMatchCheck)
         {
-            //DoCheck(cell);
+            DoCheck(cell);
         }
 
         m_CellToMatchCheck.Clear();
+    }
+
+    void MatchTicking()
+    {
+        for (int i = 0; i < m_TickingMatch.Count; ++i)
+        {
+            var match = m_TickingMatch[i];
+
+            Debug.Assert(match.MatchingGem.Count == match.MatchingGem.Distinct().Count(),
+                "There is duplicate gems in the matching lists");
+
+            const float deletionSpeed = 1.0f / 0.3f;
+            match.DeletionTimer += Time.deltaTime * deletionSpeed;
+
+            for (int j = 0; j < match.MatchingGem.Count; j++)
+            {
+                var gemIdx = match.MatchingGem[j];
+                var gem = CellContent[gemIdx].ContainingCandy;
+
+                if (gem == null)
+                {
+                    match.MatchingGem.RemoveAt(j);
+                    j--;
+                    continue;
+                }
+
+                if (gem.CurrentState == Candy.State.Bouncing)
+                {
+                    //we stop it bouncing as it is getting destroyed
+                    //We check both current and new ticking cells, as it could be the first frame where it started
+                    //bouncing so it will be in the new ticking cells NOT in the ticking cell list yet.
+                    if (m_TickingCells.Contains(gemIdx)) m_TickingCells.Remove(gemIdx);
+                    if (m_NewTickingCells.Contains(gemIdx)) m_NewTickingCells.Remove(gemIdx);
+
+                    gem.transform.position = m_Grid.GetCellCenterWorld(gemIdx);
+                    gem.transform.localScale = Vector3.one;
+                    gem.StopBouncing();
+                }
+
+                //forced deletion doesn't wait for end of timer
+                if (match.ForcedDeletion || match.DeletionTimer > 1.0f)
+                {
+                    Destroy(CellContent[gemIdx].ContainingCandy.gameObject);
+                    CellContent[gemIdx].ContainingCandy = null;
+
+                    // 장애물 추가 코드
+/*                    if (match.ForcedDeletion && CellContent[gemIdx].Obstacle != null)
+                    {
+                        CellContent[gemIdx].Obstacle.Clear();
+                    }*/
+
+                    //callback are only called when this was a match from swipe and not from bonus or other source 
+                    if (!match.ForcedDeletion && m_CellsCallbacks.TryGetValue(gemIdx, out var clbk))
+                    {
+                        clbk.Invoke();
+                    }
+
+                    match.MatchingGem.RemoveAt(j);
+                    j--;
+
+                    match.DeletedCount += 1;
+                    //we only spawn coins for non bonus match
+                    if (match.DeletedCount >= 4 && !match.ForcedDeletion)
+                    {
+                        GameManager.Instance.ChangeCoins(1);
+                        //GameManager.Instance.PoolSystem.PlayInstanceAt(GameManager.Instance.Settings.VisualSettings.CoinVFX, gem.transform.position);
+                    }
+
+                    if (match.SpawnedBonus != null && match.OriginPoint == gemIdx)
+                    {
+                        NewCandyAt(match.OriginPoint, match.SpawnedBonus);
+                    }
+                    else
+                    {
+                        m_EmptyCells.Add(gemIdx);
+                    }
+
+                    //
+                    if (gem.CurrentState != Gem.State.Disappearing)
+                    {
+                        LevelData.Instance.Matched(gem);
+
+                        foreach (var matchEffectPrefab in gem.MatchEffectPrefabs)
+                        {
+                            GameManager.Instance.PoolSystem.PlayInstanceAt(matchEffectPrefab, m_Grid.GetCellCenterWorld(gem.CurrentIndex));
+                        }
+
+                        gem.gameObject.SetActive(false);
+
+                        gem.Destroyed();
+                    }
+                }
+                else if (gem.CurrentState != Gem.State.Disappearing)
+                {
+                    LevelData.Instance.Matched(gem);
+
+                    foreach (var matchEffectPrefab in gem.MatchEffectPrefabs)
+                    {
+                        GameManager.Instance.PoolSystem.PlayInstanceAt(matchEffectPrefab, m_Grid.GetCellCenterWorld(gem.CurrentIndex));
+                    }
+
+                    gem.gameObject.SetActive(false);
+
+                    gem.Destroyed();
+                }
+            }
+
+            if (match.MatchingGem.Count == 0)
+            {
+                m_TickingMatch.RemoveAt(i);
+                i--;
+            }
+        }
     }
 
 
@@ -309,5 +622,21 @@ public class GameBoardManager : MonoBehaviour
         }
 
         Instance.SpawnerPosition.Add(cell);
+    }
+
+    //useful for bonus, this will create a new match and you can add anything you want to it.
+    public Match CreateCustomMatch(Vector3Int newCell)
+    {
+        var newMatch = new Match()
+        {
+            DeletionTimer = 0.0f,
+            MatchingGem = new(),
+            OriginPoint = newCell,
+            //SpawnedBonus = null
+        };
+
+        m_TickingMatch.Add(newMatch);
+
+        return newMatch;
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Net.Sockets;
 using UnityEngine;
 
 /// <summary>
@@ -8,54 +9,36 @@ using UnityEngine;
 /// </summary>
 public class GameBoardCell
 {
-    [SerializeField] private int candyNumber;
-    [SerializeField] private Candy candyObject;
-
+    public static readonly Vector3Int[] Neighbours =
+    {
+            Vector3Int.up,
+            Vector3Int.right,
+            Vector3Int.down,
+            Vector3Int.left
+        };
 
     public Candy ContainingCandy;
-    
+    public Candy IncomingCandy;
 
-    public GameBoardCell()
+
+    public bool Locked = false;
+
+    public bool CanFall => (ContainingCandy == null || (ContainingCandy.CanMove && ContainingCandy.CurrentMatch == null)) && !Locked;
+    public bool BlockFall => Locked || (ContainingCandy != null && !ContainingCandy.CanMove);
+    public bool CanBeMoved => !Locked && ContainingCandy != null && ContainingCandy.CanMove;
+
+    public bool CanMatch()
     {
+        return ContainingCandy != null;
     }
 
-    public GameBoardCell(GameBoardCell other)
+    public bool CanDelete()
     {
-        this.candyNumber = other.candyNumber;
-        this.candyObject = other.candyObject;
+        return !Locked;
     }
 
-    public void SetNewGameBoardCellData(GameBoardCell other)
+    public bool IsEmpty()
     {
-        this.candyNumber = other.candyNumber;
-        this.candyObject = other.candyObject;
+        return ContainingCandy == null && IncomingCandy == null;
     }
-
-    // ƒµµ ≈Õ∆Æ∏Æ±‚
-    public void PopCandy()
-    {
-        try
-        {
-            if (candyObject == null)
-            {
-                Debug.Log($"PopCandy().candyObject is null");
-            }
-
-            candyObject.SelfDestroy(success => {
-                Debug.Log($"ªÁ≈¡ Pop!");
-                candyNumber = 0;
-                candyObject = null;
-            });
-        }
-        catch (Exception e)
-        {
-            Debug.LogError(e.Message);
-        }
-    }
-
-    public int GetCandyNumber() {  return candyNumber; }
-    public Candy GetCandyObject() { return candyObject; }
-    //public RectTransform GetRectTransform() { return GetComponent<RectTransform>(); }
-    public void SetCandyNumber(int candyNumber) { this.candyNumber = candyNumber; }
-    public void SetCandyObject(Candy obj) { candyObject = obj; }
 }
