@@ -14,8 +14,9 @@ using UnityEngine.UI;
 using UnityEngine.Tilemaps;
 using UnityEngine.VFX;
 using Random = UnityEngine.Random;
+using UnityEngine.XR;
 
-
+// 이 모든 게임 단계를 스테이트 머신을 만들어서 관리하기. 
 [DefaultExecutionOrder(-9999)]
 public class GameBoardManager : MonoBehaviour
 {
@@ -25,6 +26,7 @@ public class GameBoardManager : MonoBehaviour
     public const int MIN_MATCH = 3; // 최소 매치 개수
 
     public List<Vector3Int> SpawnerPosition = new();
+    public Dictionary<Vector3Int, Queue<Candy>> SpawnerContents = new();
     // 보드의 각 셀 정보를 저장하는 딕셔너리
     public Dictionary<Vector3Int, GameBoardCell> CellContents = new();
     // 캔디 프리팹들
@@ -282,7 +284,6 @@ public class GameBoardManager : MonoBehaviour
             }
         }
 
-
         // 수직 검사
         for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
         {
@@ -313,6 +314,7 @@ public class GameBoardManager : MonoBehaviour
                 }
             }
         }
+
         // 매치 캔디들 제거
         PopMatches(matchedCandies);
     }
@@ -322,25 +324,28 @@ public class GameBoardManager : MonoBehaviour
     private void PopMatches(List<Candy> matchedCandies)
     {
         Debug.Log($"사탕 Pop!");
+        Queue<Vector3Int> emptyCellIndexQueue = new Queue<Vector3Int>();
         foreach (Candy candy in matchedCandies)
         {
+            emptyCellIndexQueue.Enqueue(candy.CurrentIndex); // 곧 Pop하여 empty가 될 캔디의 인덱스를 저장. 추후 해당 인덱스를 단서로 스폰타일을 작동시킴
             CellContents[candy.CurrentIndex].ContainingCandy = null;
             candy.Pop();
         }
 
-        PrintCellData();
+        //PrintCellData();
 
         // 빈칸으로 낙하 작업 시작
-        StartCoroutine(FindEmptyCellAndDropCandies());
+        StartCoroutine(FindEmptyCellAndMakeCandiesFall(emptyCellIndexQueue));
     }
 
 
     // 2. 하단 게임 영역 _ Empty cell 탐색 및 위치 이동. 비어있는 셀은 해당 열의 상단 요소들 값 중, 가장 가까운 캔디의 새로운 위치가 된다
-    private IEnumerator FindEmptyCellAndDropCandies()
-    {
-        Queue<Vector3Int> emptyCellIndexQueue = new Queue<Vector3Int>();
+    private IEnumerator FindEmptyCellAndMakeCandiesFall(Queue<Vector3Int> emptyCellIndexQueue)
+    {       
         Debug.Log($"사탕 드랍 시작!");
         yield return new WaitForSeconds(0.3f);
+
+        // 캔디 낙하 로직
         for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
         {
             for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
@@ -349,16 +354,15 @@ public class GameBoardManager : MonoBehaviour
                 // 빈 곳 확인
                 if (CellContents[emptyCellIndex].ContainingCandy == null)
                 {
-                    Debug.Log($"빈 칸 발견! {Grid.GetCellCenterWorld(emptyCellIndex)}");
+                    //Debug.Log($"빈 칸 발견! {Grid.GetCellCenterWorld(emptyCellIndex)}");
                     yield return new WaitForSeconds(0.1f);
 
                     var candy = FindCandyToFallInColumn(emptyCellIndex);
-                    Debug.Log($"candy.success: {candy.success}");
+                    //Debug.Log($"candy.success: {candy.success}");
                     if (candy.success)
                     {
-                        // 캔디 이동
+                        // 캔디 낙하 시작
                         MakeCandyFall(emptyCellIndex, candy.idx);
-                        emptyCellIndexQueue.Enqueue(emptyCellIndex);
                     }
                 }
             }
@@ -366,37 +370,93 @@ public class GameBoardManager : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
 
-        // DropCandies의 모든 작업이 완료되면 생성 작업 시작
+        // 생성 작업 시작
+        ActivateSpawners(emptyCellIndexQueue);
+
+        // 새로 생성된 캔디들 낙하 시작
+        MakeSpawnersCandiesFall();
+    }
+
+    private void MakeSpawnersCandiesFall()
+    {
+        // 각 Spawner 포인트 아래의 세로 열을 검색. 가장 먼 곳부터 목표로 설정하여 해당 Spawner에서 보유중인 캔디를 낙하. 
+        foreach(Vector3Int spawner in SpawnerContents.Keys)
+        {
+            // Spawner에서 보유중인 캔디를 낙하.
+            Queue<Candy> candies = SpawnerContents[spawner];
+            while (candies.Count > 0)
+            {
+                Vector3Int farthestEmptyCell = GetFarthestEmptyCellInColumnBelow(spawner);
+                //if (farthestEmptyCell != Vector3Int.zero) break;
+
+                Candy candy = candies.Dequeue();
+
+                // 캔디 오브젝트 이동
+                candy.transform.DOMove(Grid.GetCellCenterWorld(farthestEmptyCell), 0.5f).SetEase(Ease.OutBounce);
+
+                // 데이터 갱신
+                CellContents[farthestEmptyCell].ContainingCandy = candy;
+                candy.UpdateIndex(farthestEmptyCell);
+
+                Debug.Log($"Spawner:{spawner}, candy:{candy}, farthestEmptyCell:{farthestEmptyCell}, new candy Index:{candy.CurrentIndex}");
+            }
+        }
+    }
+
+    private void ActivateSpawners(Queue<Vector3Int> emptyCellIndexQueue)
+    {
+        //Debug.Log($"emptyCellIndexQueue.Count:{emptyCellIndexQueue.Count}");
         while (emptyCellIndexQueue.Count > 0)
         {
             Vector3Int emptyCell = emptyCellIndexQueue.Dequeue();
             // emptyCell의 가장 가까운 상단 SpawnerPostition 검색
-            Vector3Int closestSpawner = Vector3Int.zero;
-            foreach (Vector3Int spawnerPosition in SpawnerPosition)
-            {
-                // x좌표로 먼저 거르고
-                if(emptyCell.x == spawnerPosition.x)
-                {
-                    // 가장 y가 가까운 곳 선택
-                    if (closestSpawner.Equals(Vector3Int.zero))
-                    {
-                        closestSpawner = spawnerPosition;
-                        continue;
-                    }
-
-                    if(closestSpawner.y - emptyCell.y > spawnerPosition.y - emptyCell.y){
-                        closestSpawner = spawnerPosition;
-                    }                   
-                }
-            }
-
+            Vector3Int closestSpawner = GetClosestSpawner(emptyCell);
             // 새로운 캔디 스폰 지시
-            //ActivateSpawnerAt(closestSpawner);
+            ActivateSpawnerAt(closestSpawner);
         }
     }
 
+    private Vector3Int GetClosestSpawner(Vector3Int idx)
+    {
+        Vector3Int closestSpawner = Vector3Int.zero;
+        foreach (Vector3Int spawnerPosition in SpawnerPosition)
+        {
+            // y좌표로 먼저 거르고
+            if (idx.y == spawnerPosition.y)
+            {
+                // 가장 x가 가까운 곳 선택
+                if (closestSpawner.Equals(Vector3Int.zero))
+                {
+                    closestSpawner = spawnerPosition;
+                    continue;
+                }
+
+                if (closestSpawner.x - idx.x > spawnerPosition.x - idx.x)
+                {
+                    closestSpawner = spawnerPosition;
+                }
+            }
+        }
+        return closestSpawner;
+    }
+
+    // 세로 하단을 검색. 비어있는 가장 먼 셀을 가져옴
+    private Vector3Int GetFarthestEmptyCellInColumnBelow(Vector3Int spawnerIndex)
+    {
+        Vector3Int farthestEmptyCell = Vector3Int.zero;
+
+        for (int x = m_BoundsInt.xMax; x >= m_BoundsInt.xMin; --x)
+        {
+            if (x < spawnerIndex.x && CellContents[new Vector3Int(x, spawnerIndex.y)].ContainingCandy == null)
+                farthestEmptyCell = new Vector3Int(x, spawnerIndex.y);
+        }
+
+        return farthestEmptyCell;
+    }
+
+
     /// <summary>
-    /// startRow로 부터 TOTAL_ROW까지 row++ 중 해당 col의 값들을 검색. 가장 먼저 발견되는 0이 아닌 값의 위치를 반환합니다.
+    /// 윗쪽 셀들을 검색. 가장 먼저 발견되는 캔디의 셀 인덱스를 반환합니다.
     /// </summary>
     /// <returns>실패시 success를 false로 반환합니다</returns>
     private (bool success, Vector3Int idx) FindCandyToFallInColumn(Vector3Int emptyCellIndex)
@@ -405,11 +465,10 @@ public class GameBoardManager : MonoBehaviour
         {
             if (CellContents[new Vector3Int(x, emptyCellIndex.y)].ContainingCandy != null)
             {
-                // 빈칸이 아님! 위치 반환
+                // 성공.
                 return (true, new Vector3Int(x, emptyCellIndex.y));
             }
         }
-
         // 실패. 
         return (false, Vector3Int.zero);
     }
@@ -417,7 +476,7 @@ public class GameBoardManager : MonoBehaviour
     // 3. Candy 낙하
     private void MakeCandyFall(Vector3Int emptyCellIndex, Vector3Int candyCellIndex)
     {
-        Debug.Log($"emptyCell:{Grid.GetCellCenterWorld(emptyCellIndex)}, candyCell:{Grid.GetCellCenterWorld(candyCellIndex)}");
+        //Debug.Log($"emptyCell:{Grid.GetCellCenterWorld(emptyCellIndex)}, candyCell:{Grid.GetCellCenterWorld(candyCellIndex)}");
 
         // 캔디 오브젝트 이동
         CellContents[candyCellIndex].ContainingCandy.transform.DOMove(Grid.GetCellCenterWorld(emptyCellIndex), 0.5f).SetEase(Ease.OutBounce);
@@ -427,7 +486,7 @@ public class GameBoardManager : MonoBehaviour
         CellContents[candyCellIndex].ContainingCandy = null;
     }
 
-    // MakeCandyFall 이후 ActivateSpawnerAt 호출 방법 탐구. 그리고 이 모든 게임 단계를 스테이트 머신을 만들어서 관리하기. 
+
 
 
 
@@ -462,7 +521,7 @@ public class GameBoardManager : MonoBehaviour
         CellContents[sourceIndex].ContainingCandy = targetCandy;
         CellContents[targetIndex].ContainingCandy = sourceCandy;
 
-        PrintCellData();
+        //PrintCellData();
 
         // 스왑 후 매칭 확인
         CheckMatches();
@@ -535,17 +594,21 @@ public class GameBoardManager : MonoBehaviour
         Instance.SpawnerPosition.Add(cell);
     }
 
-    // 캔디 생성 셀을 작동시키는 메서드입니다
-    private void ActivateSpawnerAt(Vector3Int cell)
+    // 캔디 생성 셀에서 캔디를 생성합니다
+    private void ActivateSpawnerAt(Vector3Int closestSpawner)
     {
-        var candy = Instantiate(CandyPrefabs[Random.Range(0, CandyPrefabs.Length)], m_Grid.GetCellCenterWorld(cell + Vector3Int.up), Quaternion.identity);
-        //CellContents[cell].IncomingCandy = candy;
+        //Debug.Log($"closestSpawner:{closestSpawner}, worldPos:{m_Grid.GetCellCenterWorld(closestSpawner)}");
+        var candy = Instantiate(CandyPrefabs[Random.Range(0, CandyPrefabs.Length)], m_Grid.GetCellCenterWorld(closestSpawner), Quaternion.identity);
+        candy.Init(closestSpawner);
 
-        //candy.StartMoveTimer();
-        //candy.SpeedMultiplier = 1.0f;
-        //m_NewTickingCells.Add(cell);
-
-        //if (m_EmptyCells.Contains(cell)) m_EmptyCells.Remove(cell);
+        if (SpawnerContents.ContainsKey(closestSpawner))
+            SpawnerContents[closestSpawner].Enqueue(candy);
+        else
+        {
+            Queue<Candy> candies = new Queue<Candy>();
+            candies.Enqueue(candy);
+            SpawnerContents.Add(closestSpawner, candies);
+        }
     }
 
 
