@@ -50,7 +50,7 @@ public class GameBoardManager : MonoBehaviour
     {
         InitializeBoard();
 
-        CheckMatches();
+        //CheckMatches(); 초기 캔디들 겹치지 않게 GenerateBoard에서 처리하기 때문에 호출 안해도 됨.
     }
 
     // 보드 초기화 메서드
@@ -251,42 +251,62 @@ public class GameBoardManager : MonoBehaviour
     private void CheckMatches()
     {
         List<Candy> matchedCandies = new List<Candy>();
+
         // 수평 검사
         for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
         {
-            for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax-2; ++x)
+            for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax - 2; ++x)
             {
-                var idx = new Vector3Int(x, y, 0);
-                var idx2 = new Vector3Int(x + 1, y, 0);
-                var idx3 = new Vector3Int(x + 2, y, 0);
+                Vector3Int idx = new Vector3Int(x, y, 0);
+                Vector3Int idx2 = new Vector3Int(x + 1, y, 0);
+                Vector3Int idx3 = new Vector3Int(x + 2, y, 0);
+
+                //Debug.Log($"{Grid.GetCellCenterWorld(idx)}의 캔디를 기준으로 수평 확인");
 
                 if (!CellContents.TryGetValue(idx, out var current) || current.ContainingCandy == null)
+                    continue;
+                if (!CellContents.TryGetValue(idx2, out var current2) || current2.ContainingCandy == null)
+                    continue;
+                if (!CellContents.TryGetValue(idx3, out var current3) || current3.ContainingCandy == null)
                     continue;
 
                 Candy candy1 = CellContents[idx].ContainingCandy;
                 Candy candy2 = CellContents[idx2].ContainingCandy;
                 Candy candy3 = CellContents[idx3].ContainingCandy;
+
+                //Debug.Log($"candy1({Grid.GetCellCenterWorld(idx)}):{candy1}, candy2({Grid.GetCellCenterWorld(idx2)}):{candy2}, candy3({Grid.GetCellCenterWorld(idx3)}):{candy3}");
                 if (candy1.CandyType == candy2.CandyType && candy2.CandyType == candy3.CandyType)
                 {
                     matchedCandies.AddRange(new[] { candy1, candy2, candy3 });
                 }
             }
         }
+
+
         // 수직 검사
         for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
         {
             for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax-2; ++y)
             {
-                var idx = new Vector3Int(x, y, 0);
-                var idx2 = new Vector3Int(x, y + 1, 0);
-                var idx3 = new Vector3Int(x , y + 2, 0);
+                Vector3Int idx = new Vector3Int(x, y, 0);
+                Vector3Int idx2 = new Vector3Int(x, y + 1, 0);
+                Vector3Int idx3 = new Vector3Int(x , y + 2, 0);
+
+                //Debug.Log($"{Grid.GetCellCenterWorld(idx)}의 캔디를 기준으로 수직 확인");
 
                 if (!CellContents.TryGetValue(idx, out var current) || current.ContainingCandy == null)
+                    continue;
+                if (!CellContents.TryGetValue(idx2, out var current2) || current2.ContainingCandy == null)
+                    continue;
+                if (!CellContents.TryGetValue(idx3, out var current3) || current3.ContainingCandy == null)
                     continue;
 
                 Candy candy1 = CellContents[idx].ContainingCandy;
                 Candy candy2 = CellContents[idx2].ContainingCandy;
                 Candy candy3 = CellContents[idx3].ContainingCandy;
+
+                //Debug.Log($"candy1({Grid.GetCellCenterWorld(idx)}):{candy1}, candy2({Grid.GetCellCenterWorld(idx2)}):{candy2}, candy3({Grid.GetCellCenterWorld(idx3)}):{candy3}");
+
                 if (candy1.CandyType == candy2.CandyType && candy2.CandyType == candy3.CandyType)
                 {
                     matchedCandies.AddRange(new[] { candy1, candy2, candy3 });
@@ -304,10 +324,11 @@ public class GameBoardManager : MonoBehaviour
         Debug.Log($"사탕 Pop!");
         foreach (Candy candy in matchedCandies)
         {
-            candy.Destroyed();
+            CellContents[candy.CurrentIndex].ContainingCandy = null;
+            candy.Pop();
         }
         // Pop 이후 Drop작업 시작
-        StartCoroutine(FindEmptyCellAndDropCandies());
+        //StartCoroutine(FindEmptyCellAndDropCandies());
     }
 
 
@@ -416,17 +437,30 @@ public class GameBoardManager : MonoBehaviour
         Candy sourceCandy = CellContents[sourceIndex].ContainingCandy;
         Candy targetCandy = CellContents[targetIndex].ContainingCandy;
 
-        // 위치 스왑 애니메이션
-        sourceCandy.transform.DOMove(Grid.GetCellCenterWorld(targetIndex), 0.5f).SetEase(Ease.OutBounce);
-        targetCandy.transform.DOMove(Grid.GetCellCenterWorld(sourceIndex), 0.5f).SetEase(Ease.OutBounce);
+        if(targetCandy == null)
+        {
+            // 위치 스왑 애니메이션
+            sourceCandy.transform.DOMove(Grid.GetCellCenterWorld(targetIndex), 0.5f).SetEase(Ease.OutBounce);
+            sourceCandy.UpdateIndex(targetIndex);
+        }
+        else
+        {
+            // 위치 스왑 애니메이션
+            sourceCandy.transform.DOMove(Grid.GetCellCenterWorld(targetIndex), 0.5f).SetEase(Ease.OutBounce);
+            targetCandy.transform.DOMove(Grid.GetCellCenterWorld(sourceIndex), 0.5f).SetEase(Ease.OutBounce);
+
+            // Candy 객체의 내부 데이터 갱신 (필요한 경우)
+            sourceCandy.UpdateIndex(targetIndex);
+            targetCandy.UpdateIndex(sourceIndex);
+
+        }
 
         // CellContents 데이터 갱신
         CellContents[sourceIndex].ContainingCandy = targetCandy;
         CellContents[targetIndex].ContainingCandy = sourceCandy;
 
-        // Candy 객체의 내부 데이터 갱신 (필요한 경우)
-        sourceCandy.UpdateIndex(targetIndex);
-        targetCandy.UpdateIndex(sourceIndex);
+        // 스왑 후 매칭 확인
+        CheckMatches();
     }
 
 

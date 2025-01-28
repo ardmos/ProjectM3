@@ -46,8 +46,8 @@ public class Candy : MonoBehaviour
         return m_HitPoints > 0;
     }
 
-    public void Destroyed()
-    {
+    public void Pop()
+    {      
         Destroy(gameObject);
     }
 }
