@@ -327,7 +327,10 @@ public class GameBoardManager : MonoBehaviour
             CellContents[candy.CurrentIndex].ContainingCandy = null;
             candy.Pop();
         }
-        // Pop 이후 Drop작업 시작
+
+        PrintCellData();
+
+        // 빈칸으로 낙하 작업 시작
         //StartCoroutine(FindEmptyCellAndDropCandies());
     }
 
@@ -346,15 +349,15 @@ public class GameBoardManager : MonoBehaviour
                 // 빈 곳 확인
                 if (CellContents[emptyCellIndex].ContainingCandy == null)
                 {
-                    //Debug.Log($"빈 칸 발견! {row},{col}");
+                    Debug.Log($"빈 칸 발견! {emptyCellIndex}");
                     yield return new WaitForSeconds(0.1f);
 
-                    var result = FindCandyToFallInColumn(emptyCellIndex);
+                    var candy = FindCandyToFallInColumn(emptyCellIndex);
 
-                    if(result.success)
+                    if(candy.success)
                     {
                         // 캔디 이동
-                        MakeCandyFall(emptyCellIndex, result.idx);
+                        MakeCandyFall(emptyCellIndex, candy.idx);
                         emptyCellIndexQueue.Enqueue(emptyCellIndex);
                     }
                 }
@@ -388,7 +391,7 @@ public class GameBoardManager : MonoBehaviour
             }
 
             // 새로운 캔디 스폰 지시
-            ActivateSpawnerAt(closestSpawner);
+            //ActivateSpawnerAt(closestSpawner);
         }
     }
 
@@ -398,7 +401,7 @@ public class GameBoardManager : MonoBehaviour
     /// <returns>실패시 success를 false로 반환합니다</returns>
     private (bool success, Vector3Int idx) FindCandyToFallInColumn(Vector3Int emptyCellIndex)
     {
-        for (int y = emptyCellIndex.y; y < m_BoundsInt.yMax; ++y)
+        for (int y = emptyCellIndex.y; y <= m_BoundsInt.yMax; ++y)
         {
             if (CellContents[new Vector3Int(emptyCellIndex.x, y)].ContainingCandy != null)
             {
@@ -414,15 +417,14 @@ public class GameBoardManager : MonoBehaviour
     // 3. Candy 낙하
     private void MakeCandyFall(Vector3Int emptyCellIndex, Vector3Int candyCellIndex)
     {
+        Debug.Log($"emptyCell:{Grid.GetCellCenterWorld(emptyCellIndex)}, candyCell:{Grid.GetCellCenterWorld(candyCellIndex)}");
+
         // 캔디 오브젝트 이동
-        CellContents[candyCellIndex].ContainingCandy.transform.DOMove(emptyCellIndex, 0.5f).SetEase(Ease.OutBounce);
+        CellContents[candyCellIndex].ContainingCandy.transform.DOMove(Grid.GetCellCenterWorld(emptyCellIndex), 0.5f).SetEase(Ease.OutBounce);
 
         // 데이터 갱신
         CellContents[emptyCellIndex].ContainingCandy = CellContents[candyCellIndex].ContainingCandy;
         CellContents[candyCellIndex].ContainingCandy = null;
-
-        // 필요한 경우 애니메이션 추가
-        //StartCoroutine(AnimateCandyMove(candyRect, startAnchoredPos, endAnchoredPos));
     }
 
     // MakeCandyFall 이후 ActivateSpawnerAt 호출 방법 탐구. 그리고 이 모든 게임 단계를 스테이트 머신을 만들어서 관리하기. 
@@ -458,6 +460,8 @@ public class GameBoardManager : MonoBehaviour
         // CellContents 데이터 갱신
         CellContents[sourceIndex].ContainingCandy = targetCandy;
         CellContents[targetIndex].ContainingCandy = sourceCandy;
+
+        PrintCellData();
 
         // 스왑 후 매칭 확인
         CheckMatches();
@@ -544,4 +548,23 @@ public class GameBoardManager : MonoBehaviour
     }
 
 
+
+    // 디버깅용
+    private void PrintCellData()
+    {
+        for (int x = m_BoundsInt.xMax; x >= m_BoundsInt.xMin; --x)
+        {
+            string row = "";
+            for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
+            {
+                var idx = new Vector3Int(x, y, 0);
+
+                if (CellContents[idx].ContainingCandy != null)
+                    row += $", {CellContents[idx].ContainingCandy.CandyType}";
+                else
+                    row += $", -1";
+            }
+            Debug.Log($"{row}");
+        }
+    }
 }
