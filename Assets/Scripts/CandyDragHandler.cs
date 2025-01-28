@@ -4,16 +4,15 @@ using UnityEngine.EventSystems;
 
 public class CandyDragHandler : MonoBehaviour
 {
-    public float dragThreshold = 30f; // 드래그로 인식할 최소 거리
-
     public static CandyDragHandler Instance;
 
     private GameBoardManager gameBoardManager;
 
     private Dictionary<Vector3Int, GameBoardCell> gameBoardCells;
-    private Vector2 dragStartPosition;
+    private Vector3 dragStartPosition;
     private Candy draggedCandy;
     [SerializeField] private bool isSwapping = false;
+    private float dragThreshold = 0.5f; // 드래그로 인식할 최소 거리
 
     private void Awake()
     {
@@ -26,71 +25,77 @@ public class CandyDragHandler : MonoBehaviour
         gameBoardCells = gameBoardManager.CellContents;
     }
 
-    public void OnBeginDrag(PointerEventData eventData)
+    public void OnBeginDrag(Vector3 touchPos, Candy candy)
     {
         if (isSwapping) return;
 
-        dragStartPosition = eventData.position;
-        draggedCandy = eventData.pointerCurrentRaycast.gameObject?.GetComponent<Candy>();
+        dragStartPosition = touchPos;
+        draggedCandy = candy;
 
-        Debug.Log($"dragStartPosition:{dragStartPosition}, eventData.pointerCurrentRaycast.gameObject:{eventData.pointerCurrentRaycast.gameObject}, draggedCandy:{draggedCandy}");
+        //Debug.Log($"dragStartPosition:{dragStartPosition}, draggedCandy:{draggedCandy}");
     }
 
-    public void OnEndDrag(PointerEventData eventData)
+    public void OnEndDrag(Vector3 touchPos, Candy candy)
     {
+        //Debug.Log($"(isSwapping || draggedCandy == null):{(isSwapping || draggedCandy == null)}");
         if (isSwapping || draggedCandy == null) return;
 
-        Vector2 dragVector = eventData.position - dragStartPosition;
+        Vector2 dragVector = touchPos - dragStartPosition;
+        //Debug.Log($"dragVector:{dragVector}, dragThreshold:{dragThreshold}, (dragVector.magnitude < dragThreshold):{(dragVector.magnitude < dragThreshold)}");
         if (dragVector.magnitude < dragThreshold) return;
 
-        Vector2 dragDirection = GetDragDirection(dragVector);
-        Vector2 currentPos = GetCandyGridPosition(draggedCandy.GetComponent<RectTransform>());
-        Vector2 targetPos = currentPos + dragDirection;
+        Vector3Int dragDirection = GetDragDirection(dragVector);
+        Vector3Int currentIndex = draggedCandy.CurrentIndex; //GetCandyGridPosition(draggedCandy);
+        Vector3Int targetIndex = currentIndex + dragDirection;
 
-        if (IsValidGridPosition(targetPos))
+        //Debug.Log($"currentIndex:{currentIndex}, targetIndex:{targetIndex}, IsValidGridPosition(targetIndex):{IsValidGridPosition(targetIndex)}");
+
+        if (IsValidGridPosition(targetIndex))
         {
-            SwapCandies(currentPos, targetPos);
+            SwapCandies(currentIndex, targetIndex);
         }
     }
 
-    private Vector2 GetDragDirection(Vector2 dragVector)
+    private Vector3Int GetDragDirection(Vector2 dragVector)
     {
         if (Mathf.Abs(dragVector.x) > Mathf.Abs(dragVector.y))
         {
-            return dragVector.x > 0 ? Vector2.up : Vector2.down;
+            return dragVector.x > 0 ? Vector3Int.up : Vector3Int.down;
         }
         else
         {
-            return dragVector.y > 0 ? Vector2.right : Vector2.left;
+            return dragVector.y > 0 ? Vector3Int.right : Vector3Int.left;
         }
     }
 
-    private Vector2 GetCandyGridPosition(RectTransform candyRectTransform)
+    private Vector2 GetCandyGridPosition(Candy draggedCandy)
     {
-        for (int x = 0; x <= gameBoardManager.Bounds.size.x; x++)
+        for (int x = gameBoardManager.Bounds.xMin; x <= gameBoardManager.Bounds.xMax; ++x)
         {
-            for (int y = 0; y < gameBoardManager.Bounds.size.y; y++)
+            for (int y = gameBoardManager.Bounds.yMin; y <= gameBoardManager.Bounds.yMax; ++y)
             {
-/*                if (gameBoardCells[x, y].GetCandyObject().GetRectTransform() == candyRectTransform)
+                var idx = new Vector3Int(x, y);
+
+                if (gameBoardCells[idx].ContainingCandy == draggedCandy)
                 {
-                    return new Vector2(x, y);
-                }*/
+                    return new Vector2(idx.x, idx.y);
+                }
             }
         }
         return Vector2.negativeInfinity;
     }
 
-    private bool IsValidGridPosition(Vector2 pos)
+    private bool IsValidGridPosition(Vector3Int idx)
     {
-        return pos.x >= 0 && pos.x <= gameBoardManager.Bounds.size.x &&
-               pos.y >= 0 && pos.y < gameBoardManager.Bounds.size.y;
+        return idx.x >= gameBoardManager.Bounds.xMin && idx.x <= gameBoardManager.Bounds.xMax &&
+               idx.y >= gameBoardManager.Bounds.yMin && idx.y <= gameBoardManager.Bounds.yMax;
     }
 
-    private void SwapCandies(Vector2 pos1, Vector2 pos2)
+    private void SwapCandies(Vector3Int idx1, Vector3Int idx2)
     {
         isSwapping = true;
 
-        //StartCoroutine(gameBoardManager.SwapCandies((int)pos1.x, (int)pos1.y, (int)pos2.x, (int)pos2.y));
+        gameBoardManager.SwapCandies(idx1, idx2);
 
         isSwapping = false;
     }

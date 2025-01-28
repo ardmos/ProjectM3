@@ -3,20 +3,37 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CandyDraggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class CandyDraggable : MonoBehaviour
 {
-    public void OnBeginDrag(PointerEventData eventData)
+    private float mZCoord;
+    private Candy candy;
+
+    private void Awake()
     {
-        CandyDragHandler.Instance.OnBeginDrag(eventData);
+        candy = GetComponent<Candy>();
     }
 
-    public void OnDrag(PointerEventData eventData)
+    private void OnMouseDown()
     {
-        //transform.position = eventData.position;
+        mZCoord = Camera.main.WorldToScreenPoint(gameObject.transform.position).z;
+
+        Vector3 touchPos = GetMouseAsWorldPoint();   
+
+        CandyDragHandler.Instance.OnBeginDrag(touchPos, candy);
     }
 
-    public void OnEndDrag(PointerEventData eventData)
+    private void OnMouseUp()
     {
-        CandyDragHandler.Instance.OnEndDrag(eventData);
+        //Debug.Log("OnMouseUp()");
+        Vector3 touchPos = GetMouseAsWorldPoint();
+
+        CandyDragHandler.Instance.OnEndDrag(touchPos, candy);
+    }
+
+    private Vector3 GetMouseAsWorldPoint()
+    {
+        Vector3 mousePoint = Input.mousePosition;
+        mousePoint.z = mZCoord;
+        return Camera.main.ScreenToWorldPoint(mousePoint);
     }
 }

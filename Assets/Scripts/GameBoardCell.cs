@@ -18,14 +18,9 @@ public class GameBoardCell
         };
 
     public Candy ContainingCandy;
-    public Candy IncomingCandy;
 
 
     public bool Locked = false;
-
-    public bool CanFall => (ContainingCandy == null || (ContainingCandy.CanMove && ContainingCandy.CurrentMatch == null)) && !Locked;
-    public bool BlockFall => Locked || (ContainingCandy != null && !ContainingCandy.CanMove);
-    public bool CanBeMoved => !Locked && ContainingCandy != null && ContainingCandy.CanMove;
 
     public bool CanMatch()
     {
@@ -39,6 +34,6 @@ public class GameBoardCell
 
     public bool IsEmpty()
     {
-        return ContainingCandy == null && IncomingCandy == null;
+        return ContainingCandy == null;
     }
 }

@@ -7,48 +7,28 @@ using UnityEngine.EventSystems;
 
 public class Candy : MonoBehaviour
 {
-    public enum State
-    {
-        Still,
-        Falling,
-        Bouncing,
-        Disappearing
-    }
-
     public int CandyType;
 
-    public Sprite UISprite;
+    //public Sprite UISprite; 아이템 효과?
     //When a gem get added to a match, this match get stored here so we can now if this gem is currently in a match and 
     //cannot be used for anything else.
     public Match CurrentMatch = null;
-    //this is set to sqrt(2) when falling in diagonal so the time of a diagonal fall is the same as a direct one
-    [HideInInspector]
-    public float SpeedMultiplier = 1.0f;
-    public State CurrentState => m_CurrentState;
-    public bool CanMove => m_CanMove && m_CurrentState is State.Still;
+
     public Vector3Int CurrentIndex => m_CurrentIndex;
-    public bool Usable => m_Usable;
-    public bool Used => m_Used;
-    public float FallTime => m_FallTime;
     public int HitPoint => m_HitPoints;
-
-    private State m_CurrentState = State.Still;
-
-    //If this is set to true, the Use function will be called when swapping or double clicking the gem.
-    //Not used in this base class, but useful for BonusGem.
-    protected bool m_Usable = false;
-    protected bool m_Used = false;
-    protected bool m_CanMove = true;
     protected Vector3Int m_CurrentIndex;
-
     protected int m_HitPoints = 1;
 
-    private float m_FallTime = 0.0f;
 
 
     public virtual void Init(Vector3Int startIdx)
     {
         m_CurrentIndex = startIdx;
+    }
+
+    public void UpdateIndex(Vector3Int newIndex)
+    {
+        m_CurrentIndex = newIndex;
     }
 
     // Called when swapping a Gem that have its Usable set to true. SwappedGem will contains the other gem it was swiped
@@ -66,37 +46,8 @@ public class Candy : MonoBehaviour
         return m_HitPoints > 0;
     }
 
-    public void MoveTo(Vector3Int newCell)
-    {
-        m_CurrentIndex = newCell;
-    }
-
-    public void StartMoveTimer()
-    {
-        m_FallTime = 0;
-
-        m_CurrentState = State.Falling;
-    }
-
-    public void TickMoveTimer(float deltaTime)
-    {
-        m_FallTime += deltaTime;
-    }
-
-    public void StopFalling()
-    {
-        m_CurrentState = State.Bouncing;
-        m_FallTime = 0;
-    }
-
-    public void StopBouncing()
-    {
-        m_CurrentState = State.Still;
-    }
-
     public void Destroyed()
     {
-        m_CurrentState = State.Disappearing;
         Destroy(gameObject);
     }
 }

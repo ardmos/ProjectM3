@@ -254,7 +254,7 @@ public class GameBoardManager : MonoBehaviour
         // 수평 검사
         for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
         {
-            for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
+            for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax-2; ++x)
             {
                 var idx = new Vector3Int(x, y, 0);
                 var idx2 = new Vector3Int(x + 1, y, 0);
@@ -275,7 +275,7 @@ public class GameBoardManager : MonoBehaviour
         // 수직 검사
         for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
         {
-            for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
+            for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax-2; ++y)
             {
                 var idx = new Vector3Int(x, y, 0);
                 var idx2 = new Vector3Int(x, y + 1, 0);
@@ -314,7 +314,7 @@ public class GameBoardManager : MonoBehaviour
     // 2. 하단 게임 영역 _ Empty cell 탐색 및 위치 이동. 비어있는 셀은 해당 열의 상단 요소들 값 중, 가장 가까운 캔디의 새로운 위치가 된다
     private IEnumerator FindEmptyCellAndDropCandies()
     {
-        int moveCount = 0;
+        Queue<Vector3Int> emptyCellIndexQueue = new Queue<Vector3Int>();
         Debug.Log($"사탕 드랍 시작!");
         yield return new WaitForSeconds(0.3f);
         for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
@@ -334,24 +334,40 @@ public class GameBoardManager : MonoBehaviour
                     {
                         // 캔디 이동
                         MakeCandyFall(emptyCellIndex, result.idx);
-                        //moveCount++;
+                        emptyCellIndexQueue.Enqueue(emptyCellIndex);
                     }
                 }
             }
         }
 
         yield return new WaitForSeconds(0.5f);
-        if (moveCount > 0)
-        {
-            // DropCandies의 모든 작업이 완료되면 생성 작업 시작
-            //CreateCandies();
 
-            // 세로줄 상단에 유효한 Spawner 위치 찾기.  그런데 이건 연쇄적인 드랍 로직이 실행되어 Spawner 바로 아래 칸이 비어있는경우 동작해야 자연스러움.
-            // 연쇄적으로 낙하하도록 낙하 로직을 수정할지, Spawner 큐를 만들어서 넣어뒀다가 바로 아래가 비어있는걸 확인하면 생성을 돌릴지... 고민고민! 
-            /*            if (SpawnerPosition.Contains(cellIdx + Vector3Int.up))
-                        {
-                            ActivateSpawnerAt(cellIdx);
-                        }*/
+        // DropCandies의 모든 작업이 완료되면 생성 작업 시작
+        while (emptyCellIndexQueue.Count > 0)
+        {
+            Vector3Int emptyCell = emptyCellIndexQueue.Dequeue();
+            // emptyCell의 가장 가까운 상단 SpawnerPostition 검색
+            Vector3Int closestSpawner = Vector3Int.zero;
+            foreach (Vector3Int spawnerPosition in SpawnerPosition)
+            {
+                // x좌표로 먼저 거르고
+                if(emptyCell.x == spawnerPosition.x)
+                {
+                    // 가장 y가 가까운 곳 선택
+                    if (closestSpawner.Equals(Vector3Int.zero))
+                    {
+                        closestSpawner = spawnerPosition;
+                        continue;
+                    }
+
+                    if(closestSpawner.y - emptyCell.y > spawnerPosition.y - emptyCell.y){
+                        closestSpawner = spawnerPosition;
+                    }                   
+                }
+            }
+
+            // 새로운 캔디 스폰 지시
+            ActivateSpawnerAt(closestSpawner);
         }
     }
 
@@ -374,6 +390,7 @@ public class GameBoardManager : MonoBehaviour
         return (false, Vector3Int.zero);
     }
 
+    // 3. Candy 낙하
     private void MakeCandyFall(Vector3Int emptyCellIndex, Vector3Int candyCellIndex)
     {
         // 캔디 오브젝트 이동
@@ -389,19 +406,28 @@ public class GameBoardManager : MonoBehaviour
 
     // MakeCandyFall 이후 ActivateSpawnerAt 호출 방법 탐구. 그리고 이 모든 게임 단계를 스테이트 머신을 만들어서 관리하기. 
 
-    // 3. Candy 낙하
+
 
 
     // 4. 스왑
+    public void SwapCandies(Vector3Int sourceIndex, Vector3Int targetIndex)
+    {
+        // 캔디 오브젝트 참조 저장
+        Candy sourceCandy = CellContents[sourceIndex].ContainingCandy;
+        Candy targetCandy = CellContents[targetIndex].ContainingCandy;
 
+        // 위치 스왑 애니메이션
+        sourceCandy.transform.DOMove(Grid.GetCellCenterWorld(targetIndex), 0.5f).SetEase(Ease.OutBounce);
+        targetCandy.transform.DOMove(Grid.GetCellCenterWorld(sourceIndex), 0.5f).SetEase(Ease.OutBounce);
 
+        // CellContents 데이터 갱신
+        CellContents[sourceIndex].ContainingCandy = targetCandy;
+        CellContents[targetIndex].ContainingCandy = sourceCandy;
 
-
-
-
-
-
-
+        // Candy 객체의 내부 데이터 갱신 (필요한 경우)
+        sourceCandy.UpdateIndex(targetIndex);
+        targetCandy.UpdateIndex(sourceIndex);
+    }
 
 
     /// <summary>
@@ -474,10 +500,10 @@ public class GameBoardManager : MonoBehaviour
     private void ActivateSpawnerAt(Vector3Int cell)
     {
         var candy = Instantiate(CandyPrefabs[Random.Range(0, CandyPrefabs.Length)], m_Grid.GetCellCenterWorld(cell + Vector3Int.up), Quaternion.identity);
-        CellContents[cell].IncomingCandy = candy;
+        //CellContents[cell].IncomingCandy = candy;
 
-        candy.StartMoveTimer();
-        candy.SpeedMultiplier = 1.0f;
+        //candy.StartMoveTimer();
+        //candy.SpeedMultiplier = 1.0f;
         //m_NewTickingCells.Add(cell);
 
         //if (m_EmptyCells.Contains(cell)) m_EmptyCells.Remove(cell);
