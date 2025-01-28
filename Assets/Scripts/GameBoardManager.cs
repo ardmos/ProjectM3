@@ -316,13 +316,16 @@ public class GameBoardManager : MonoBehaviour
         }
 
         // 매치 캔디들 제거
-        PopMatches(matchedCandies);
+        StartCoroutine(PopMatches(matchedCandies));
     }
     /// <summary>
     /// 매치 캔디들 제거
     /// </summary>
-    private void PopMatches(List<Candy> matchedCandies)
+    private IEnumerator PopMatches(List<Candy> matchedCandies)
     {
+        // 잠시 시간을 준 뒤 pop 합니다. 이 시간은 이펙트 재생시간이 될 것입니다.
+        yield return new WaitForSeconds(0.5f);
+
         Debug.Log($"사탕 Pop!");
         Queue<Vector3Int> emptyCellIndexQueue = new Queue<Vector3Int>();
         foreach (Candy candy in matchedCandies)
@@ -368,7 +371,7 @@ public class GameBoardManager : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
 
         // 생성 작업 시작
         ActivateSpawners(emptyCellIndexQueue);
@@ -387,7 +390,6 @@ public class GameBoardManager : MonoBehaviour
             while (candies.Count > 0)
             {
                 Vector3Int farthestEmptyCell = GetFarthestEmptyCellInColumnBelow(spawner);
-                //if (farthestEmptyCell != Vector3Int.zero) break;
 
                 Candy candy = candies.Dequeue();
 
@@ -398,7 +400,7 @@ public class GameBoardManager : MonoBehaviour
                 CellContents[farthestEmptyCell].ContainingCandy = candy;
                 candy.UpdateIndex(farthestEmptyCell);
 
-                Debug.Log($"Spawner:{spawner}, candy:{candy}, farthestEmptyCell:{farthestEmptyCell}, new candy Index:{candy.CurrentIndex}");
+                //Debug.Log($"Spawner:{spawner}, candy:{candy}, farthestEmptyCell:{farthestEmptyCell}, new candy Index:{candy.CurrentIndex}");
             }
         }
     }
@@ -485,11 +487,6 @@ public class GameBoardManager : MonoBehaviour
         CellContents[emptyCellIndex].ContainingCandy = CellContents[candyCellIndex].ContainingCandy;
         CellContents[candyCellIndex].ContainingCandy = null;
     }
-
-
-
-
-
 
     // 4. 스왑
     public void SwapCandies(Vector3Int sourceIndex, Vector3Int targetIndex)
