@@ -331,7 +331,7 @@ public class GameBoardManager : MonoBehaviour
         PrintCellData();
 
         // 빈칸으로 낙하 작업 시작
-        //StartCoroutine(FindEmptyCellAndDropCandies());
+        StartCoroutine(FindEmptyCellAndDropCandies());
     }
 
 
@@ -341,20 +341,20 @@ public class GameBoardManager : MonoBehaviour
         Queue<Vector3Int> emptyCellIndexQueue = new Queue<Vector3Int>();
         Debug.Log($"사탕 드랍 시작!");
         yield return new WaitForSeconds(0.3f);
-        for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
+        for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
         {
-            for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
+            for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
             {
                 var emptyCellIndex = new Vector3Int(x, y, 0);
                 // 빈 곳 확인
                 if (CellContents[emptyCellIndex].ContainingCandy == null)
                 {
-                    Debug.Log($"빈 칸 발견! {emptyCellIndex}");
+                    Debug.Log($"빈 칸 발견! {Grid.GetCellCenterWorld(emptyCellIndex)}");
                     yield return new WaitForSeconds(0.1f);
 
                     var candy = FindCandyToFallInColumn(emptyCellIndex);
-
-                    if(candy.success)
+                    Debug.Log($"candy.success: {candy.success}");
+                    if (candy.success)
                     {
                         // 캔디 이동
                         MakeCandyFall(emptyCellIndex, candy.idx);
@@ -401,12 +401,12 @@ public class GameBoardManager : MonoBehaviour
     /// <returns>실패시 success를 false로 반환합니다</returns>
     private (bool success, Vector3Int idx) FindCandyToFallInColumn(Vector3Int emptyCellIndex)
     {
-        for (int y = emptyCellIndex.y; y <= m_BoundsInt.yMax; ++y)
+        for (int x = emptyCellIndex.x; x <= m_BoundsInt.xMax; ++x)
         {
-            if (CellContents[new Vector3Int(emptyCellIndex.x, y)].ContainingCandy != null)
+            if (CellContents[new Vector3Int(x, emptyCellIndex.y)].ContainingCandy != null)
             {
                 // 빈칸이 아님! 위치 반환
-                return (true, new Vector3Int(emptyCellIndex.x, y));
+                return (true, new Vector3Int(x, emptyCellIndex.y));
             }
         }
 
@@ -438,6 +438,7 @@ public class GameBoardManager : MonoBehaviour
         // 캔디 오브젝트 참조 저장
         Candy sourceCandy = CellContents[sourceIndex].ContainingCandy;
         Candy targetCandy = CellContents[targetIndex].ContainingCandy;
+        if (sourceCandy == null) return;
 
         if(targetCandy == null)
         {
