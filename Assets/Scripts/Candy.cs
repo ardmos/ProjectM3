@@ -97,10 +97,6 @@ public class Candy : MonoBehaviour
     public void Destroyed()
     {
         m_CurrentState = State.Disappearing;
-    }
-
-    public virtual void Init(Vector3Int startIdx)
-    {
-        m_CurrentIndex = startIdx;
+        Destroy(gameObject);
     }
 }

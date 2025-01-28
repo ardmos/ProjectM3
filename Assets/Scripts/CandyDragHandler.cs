@@ -1,14 +1,16 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class CandyDragHandler : MonoBehaviour
 {
-/*    public float dragThreshold = 30f; // 드래그로 인식할 최소 거리
+    public float dragThreshold = 30f; // 드래그로 인식할 최소 거리
 
     public static CandyDragHandler Instance;
-    public GameBoardManager gameBoardManager;
 
-    private GameBoardCell[,] gameBoardCells;
+    private GameBoardManager gameBoardManager;
+
+    private Dictionary<Vector3Int, GameBoardCell> gameBoardCells;
     private Vector2 dragStartPosition;
     private Candy draggedCandy;
     [SerializeField] private bool isSwapping = false;
@@ -20,7 +22,8 @@ public class CandyDragHandler : MonoBehaviour
 
     private void Start()
     {
-        gameBoardCells = gameBoardManager.GetGameBoardCellsArray();
+        gameBoardManager = GameBoardManager.Instance;
+        gameBoardCells = gameBoardManager.CellContents;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
@@ -64,14 +67,14 @@ public class CandyDragHandler : MonoBehaviour
 
     private Vector2 GetCandyGridPosition(RectTransform candyRectTransform)
     {
-        for (int x = GameBoardManager.ROW_START_GAME_AREA; x <= GameBoardManager.ROW_END_GAME_AREA; x++)
+        for (int x = 0; x <= gameBoardManager.Bounds.size.x; x++)
         {
-            for (int y = 0; y < GameBoardManager.TOTAL_COL; y++)
+            for (int y = 0; y < gameBoardManager.Bounds.size.y; y++)
             {
-                if (gameBoardCells[x, y].GetCandyObject().GetRectTransform() == candyRectTransform)
+/*                if (gameBoardCells[x, y].GetCandyObject().GetRectTransform() == candyRectTransform)
                 {
                     return new Vector2(x, y);
-                }
+                }*/
             }
         }
         return Vector2.negativeInfinity;
@@ -79,16 +82,16 @@ public class CandyDragHandler : MonoBehaviour
 
     private bool IsValidGridPosition(Vector2 pos)
     {
-        return pos.x >= 0 && pos.x <= GameBoardManager.ROW_END_GAME_AREA &&
-               pos.y >= 0 && pos.y < GameBoardManager.TOTAL_COL;
+        return pos.x >= 0 && pos.x <= gameBoardManager.Bounds.size.x &&
+               pos.y >= 0 && pos.y < gameBoardManager.Bounds.size.y;
     }
 
     private void SwapCandies(Vector2 pos1, Vector2 pos2)
     {
         isSwapping = true;
 
-        StartCoroutine(gameBoardManager.SwapCandies((int)pos1.x, (int)pos1.y, (int)pos2.x, (int)pos2.y));
+        //StartCoroutine(gameBoardManager.SwapCandies((int)pos1.x, (int)pos1.y, (int)pos2.x, (int)pos2.y));
 
         isSwapping = false;
-    }*/
+    }
 }
