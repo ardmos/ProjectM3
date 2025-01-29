@@ -9,17 +9,10 @@ public class ScoreManager : MonoBehaviour
 {
     public TextMeshProUGUI CurrentScoreText;
     public GameObject[] StarObjects = new GameObject[3];
-
+    public int StarScore = 0;
     [SerializeField] private int currentScore = 0;
 
-    private void Start()
-    {
-        AllStarsOff();
-
-        GameBoardManager.Instance.OnPopped += AddScore;
-    }
-
-    private void AddScore(List<Candy> poppedCandies)
+    public void AddScore(List<Candy> poppedCandies)
     {
         foreach (Candy poppedCandy in poppedCandies)
         {
@@ -52,13 +45,8 @@ public class ScoreManager : MonoBehaviour
         {
             StarObjects[i].SetActive(i < starsEarned);
         }
-    }
 
-    private void AllStarsOff()
-    {
-        StarObjects[2].SetActive(false);
-        StarObjects[1].SetActive(false);
-        StarObjects[0].SetActive(false);
+        StarScore = starsEarned;
     }
 
     public int GetCurrentScore() => currentScore;

@@ -2306,6 +2306,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &675494466
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 675494468}
+  - component: {fileID: 675494467}
+  m_Layer: 0
+  m_Name: CandyPoppedEventManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &675494467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 675494466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90f9f2cc7de915c49b70b1068d0ee06e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ScoreManager: {fileID: 1933397779}
+  TargetCountManager: {fileID: 1642777436}
+--- !u!4 &675494468
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 675494466}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 698.43445, y: 1337.0784, z: -4.531024}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &710907370
 GameObject:
   m_ObjectHideFlags: 0
@@ -7349,7 +7395,7 @@ MonoBehaviour:
     Count: 3
   - CandyType: 3
     Count: 3
-  TargetScore: 1e0000003c00000078000000
+  TargetScore: 6400000058020000b0040000
   MoveMaxCount: 20
   CandyPrefabs:
   - {fileID: -948302693355730056, guid: 36a7f26c2e11ea546bd9e9c5e8f0e167, type: 3}
@@ -7816,7 +7862,7 @@ GameObject:
   - component: {fileID: 1913506996}
   - component: {fileID: 1913506997}
   m_Layer: 5
-  m_Name: Score Panel
+  m_Name: Popup Score Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7860,8 +7906,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19a6fda05cc54f841ab331efe136d190, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scoreText: {fileID: 225240500}
-  scoreManager: {fileID: 1933397779}
+  TitleText: {fileID: 1832342283}
+  StarObjects:
+  - {fileID: 2063533341}
+  - {fileID: 781318373}
+  - {fileID: 903415425}
+  ScoreText: {fileID: 225240500}
+  ScoreManager: {fileID: 1933397779}
+  CloseButton: {fileID: 441167609}
+  RetryButton: {fileID: 400983416}
+  NextButton: {fileID: 133445814}
 --- !u!1 &1927952169
 GameObject:
   m_ObjectHideFlags: 0
@@ -7971,6 +8025,7 @@ MonoBehaviour:
   - {fileID: 588422891}
   - {fileID: 1004670949}
   - {fileID: 1678800229}
+  StarScore: 0
   currentScore: 0
 --- !u!4 &1933397780
 Transform:
@@ -8368,3 +8423,4 @@ SceneRoots:
   - {fileID: 256635128}
   - {fileID: 535182541}
   - {fileID: 1642777437}
+  - {fileID: 675494468}

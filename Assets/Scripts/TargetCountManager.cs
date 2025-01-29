@@ -13,8 +13,6 @@ public class TargetCountManager : MonoBehaviour
 
     void Start()
     {
-        GameBoardManager.Instance.OnPopped += Instance_OnPopped;
-
         InitTargetPanel();
     }
 
@@ -28,7 +26,7 @@ public class TargetCountManager : MonoBehaviour
         }
     }
 
-    private void Instance_OnPopped(List<Candy> poppedCandies)
+    public void CheckTargetClear(List<Candy> poppedCandies)
     {
         foreach (Candy candy in poppedCandies)
         {
