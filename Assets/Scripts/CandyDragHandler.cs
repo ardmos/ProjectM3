@@ -27,7 +27,7 @@ public class CandyDragHandler : MonoBehaviour
 
     public void OnBeginDrag(Vector3 touchPos, Candy candy)
     {
-        if (isSwapping) return;
+        if (isSwapping || gameBoardManager.state != GameBoardManager.State.Idle) return;
 
         dragStartPosition = touchPos;
         draggedCandy = candy;
@@ -95,7 +95,8 @@ public class CandyDragHandler : MonoBehaviour
     {
         isSwapping = true;
 
-        gameBoardManager.SwapCandies(idx1, idx2);
+        //gameBoardManager.SwapCandies(idx1, idx2);
+        gameBoardManager.StartSwap(idx1, idx2);
 
         isSwapping = false;
     }

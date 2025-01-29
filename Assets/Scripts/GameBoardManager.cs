@@ -16,10 +16,22 @@ using UnityEngine.VFX;
 using Random = UnityEngine.Random;
 using UnityEngine.XR;
 
-// 이 모든 게임 단계를 스테이트 머신을 만들어서 관리하기. 
+
 [DefaultExecutionOrder(-9999)]
 public class GameBoardManager : MonoBehaviour
 {
+    public enum State
+    {
+        Init,
+        Idle,
+        MatchCheck,
+        Pop,
+        EmptyCheck,
+        Spawn,
+        Fall,
+        Swap
+    }
+
     // 싱글톤 인스턴스
     public static GameBoardManager Instance;
 
@@ -43,6 +55,18 @@ public class GameBoardManager : MonoBehaviour
     // 젬 타입과 실제 Gem 객체를 매핑하는 딕셔너리
     private Dictionary<int, Candy> m_CandyLookup;
 
+    public State state = State.Init;
+
+    // 스왑 관련 변수
+    private Vector3Int swapSourceIdx = new();
+    private Vector3Int swapTargetIdx = new();
+
+    // 매치 체크 결과 변수
+    private List<Candy> matchedCandies = new List<Candy>();
+
+    // 빈칸 검색 결과 변수
+    private List<Vector3Int> emptyCells = new List<Vector3Int>();
+
     private void Awake()
     {
         Instance = this;
@@ -50,9 +74,7 @@ public class GameBoardManager : MonoBehaviour
 
     private void Start()
     {
-        InitializeBoard();
-
-        //CheckMatches(); 초기 캔디들 겹치지 않게 GenerateBoard에서 처리하기 때문에 호출 안해도 됨.
+        UpdateState(State.Init);
     }
 
     // 보드 초기화 메서드
@@ -64,6 +86,54 @@ public class GameBoardManager : MonoBehaviour
         InitializeCandyLookup();
         // 보드 생성
         GenerateBoard();
+    }
+
+
+    private void RunStateMachine()
+    {
+        switch (state)
+        {
+            case State.Init:
+                InitializeBoard();
+                UpdateState(State.Idle);
+                break;
+            case State.Idle:
+                // 기본 상태
+                //Debug.Log($"Idle State:{state}");
+                break;
+            case State.MatchCheck:
+                CheckMatches();
+                // 매치 캔디들 제거
+                if (matchedCandies.Count > 0)
+                    UpdateState(State.Pop);
+                else
+                    UpdateState(State.Idle);
+                break;
+            case State.Pop:
+                PopMatches();
+                // 빈칸 체크 시작
+                UpdateState(State.EmptyCheck);
+                break;
+            case State.EmptyCheck:
+                EmptyCheck();
+                UpdateState(State.Spawn);
+                break;
+            case State.Spawn:
+                Spawn();
+                UpdateState(State.Fall);
+                break;
+            case State.Fall:
+                Fall();
+                UpdateState(State.MatchCheck);
+                break;
+            case State.Swap:
+                SwapCandies(swapSourceIdx, swapTargetIdx);
+                // 스왑 후 매칭 확인
+                UpdateState(State.MatchCheck);
+                break;
+            default:
+                break;
+        }
     }
 
     // 보드 경계 설정
@@ -119,7 +189,7 @@ public class GameBoardManager : MonoBehaviour
                 if (!CellContents.TryGetValue(idx, out var current) || current.ContainingCandy != null)
                     continue;
 
-                var availableGems = m_CandyLookup.Keys.ToList();
+                var availableCandies = m_CandyLookup.Keys.ToList();
 
                 int leftGemType = -1;
                 int bottomGemType = -1;
@@ -136,7 +206,7 @@ public class GameBoardManager : MonoBehaviour
                         leftLeftContent.ContainingCandy != null && leftGemType == leftLeftContent.ContainingCandy.CandyType)
                     {
                         //we have two gem of a given type on the left, so we can't ue that type anymore
-                        availableGems.Remove(leftGemType);
+                        availableCandies.Remove(leftGemType);
                     }
                 }
 
@@ -150,7 +220,7 @@ public class GameBoardManager : MonoBehaviour
                         bottomBottomContent.ContainingCandy != null && bottomGemType == bottomBottomContent.ContainingCandy.CandyType)
                     {
                         //we have two gem of a given type on the bottom, so we can't ue that type anymore
-                        availableGems.Remove(bottomGemType);
+                        availableCandies.Remove(bottomGemType);
                     }
 
                     if (leftGemType != -1 && leftGemType == bottomGemType)
@@ -161,7 +231,7 @@ public class GameBoardManager : MonoBehaviour
                             bottomLeftContent.ContainingCandy != null && bottomGemType == leftGemType)
                         {
                             //we already have a corner of gem on left, bottom left and bottom position, so remove that type
-                            availableGems.Remove(leftGemType);
+                            availableCandies.Remove(leftGemType);
                         }
                     }
                 }
@@ -178,14 +248,14 @@ public class GameBoardManager : MonoBehaviour
                     //we have the same type on left and right, so placing that type here would create a 3 line
                     if (rightGemType != -1 && leftGemType == rightGemType)
                     {
-                        availableGems.Remove(rightGemType);
+                        availableCandies.Remove(rightGemType);
                     }
 
                     if (CellContents.TryGetValue(idx + new Vector3Int(2, 0, 0), out var rightRightContent) &&
                         rightRightContent.ContainingCandy != null && rightGemType == rightRightContent.ContainingCandy.CandyType)
                     {
                         //we have two gem of a given type on the right, so we can't ue that type anymore
-                        availableGems.Remove(rightGemType);
+                        availableCandies.Remove(rightGemType);
                     }
 
                     //right and bottom gem are the same, check the bottom right to avoid creating a square
@@ -194,7 +264,7 @@ public class GameBoardManager : MonoBehaviour
                         if (CellContents.TryGetValue(idx + new Vector3Int(1, -1, 0), out var bottomRightContent) &&
                             bottomRightContent.ContainingCandy != null && bottomRightContent.ContainingCandy.CandyType == rightGemType)
                         {
-                            availableGems.Remove(rightGemType);
+                            availableCandies.Remove(rightGemType);
                         }
                     }
                 }
@@ -208,14 +278,14 @@ public class GameBoardManager : MonoBehaviour
                     //we have the same type on top and bottom, so placing that type here would create a 3 line
                     if (topGemType != -1 && topGemType == bottomGemType)
                     {
-                        availableGems.Remove(topGemType);
+                        availableCandies.Remove(topGemType);
                     }
 
                     if (CellContents.TryGetValue(idx + new Vector3Int(0, 1, 0), out var topTopContent) &&
                         topTopContent.ContainingCandy != null && topGemType == topTopContent.ContainingCandy.CandyType)
                     {
                         //we have two gem of a given type on the top, so we can't ue that type anymore
-                        availableGems.Remove(topGemType);
+                        availableCandies.Remove(topGemType);
                     }
 
                     //right and top gem are the same, check the top right to avoid creating a square
@@ -224,7 +294,7 @@ public class GameBoardManager : MonoBehaviour
                         if (CellContents.TryGetValue(idx + new Vector3Int(1, 1, 0), out var topRightContent) &&
                             topRightContent.ContainingCandy != null && topRightContent.ContainingCandy.CandyType == topGemType)
                         {
-                            availableGems.Remove(topGemType);
+                            availableCandies.Remove(topGemType);
                         }
                     }
 
@@ -234,13 +304,13 @@ public class GameBoardManager : MonoBehaviour
                         if (CellContents.TryGetValue(idx + new Vector3Int(-1, 1, 0), out var topLeftContent) &&
                             topLeftContent.ContainingCandy != null && topLeftContent.ContainingCandy.CandyType == topGemType)
                         {
-                            availableGems.Remove(topGemType);
+                            availableCandies.Remove(topGemType);
                         }
                     }
                 }
 
 
-                var chosenGem = availableGems[Random.Range(0, availableGems.Count)];
+                var chosenGem = availableCandies[Random.Range(0, availableCandies.Count)];
                 NewCandyAt(idx, m_CandyLookup[chosenGem]);
             }
         }
@@ -252,8 +322,6 @@ public class GameBoardManager : MonoBehaviour
     /// </summary>
     private void CheckMatches()
     {
-        List<Candy> matchedCandies = new List<Candy>();
-
         // 수평 검사
         for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
         {
@@ -314,40 +382,25 @@ public class GameBoardManager : MonoBehaviour
                 }
             }
         }
-
-        // 매치 캔디들 제거
-        StartCoroutine(PopMatches(matchedCandies));
     }
     /// <summary>
     /// 매치 캔디들 제거
     /// </summary>
-    private IEnumerator PopMatches(List<Candy> matchedCandies)
+    private void PopMatches()
     {
-        // 잠시 시간을 준 뒤 pop 합니다. 이 시간은 이펙트 재생시간이 될 것입니다.
-        yield return new WaitForSeconds(0.5f);
-
-        Debug.Log($"사탕 Pop!");
-        Queue<Vector3Int> emptyCellIndexQueue = new Queue<Vector3Int>();
+        //Debug.Log($"사탕 Pop!");
         foreach (Candy candy in matchedCandies)
         {
-            emptyCellIndexQueue.Enqueue(candy.CurrentIndex); // 곧 Pop하여 empty가 될 캔디의 인덱스를 저장. 추후 해당 인덱스를 단서로 스폰타일을 작동시킴
             CellContents[candy.CurrentIndex].ContainingCandy = null;
             candy.Pop();
         }
 
-        //PrintCellData();
-
-        // 빈칸으로 낙하 작업 시작
-        StartCoroutine(FindEmptyCellAndMakeCandiesFall(emptyCellIndexQueue));
+        // 매치 결과 리스트 초기화
+        matchedCandies.Clear();
     }
 
-
-    // 2. 하단 게임 영역 _ Empty cell 탐색 및 위치 이동. 비어있는 셀은 해당 열의 상단 요소들 값 중, 가장 가까운 캔디의 새로운 위치가 된다
-    private IEnumerator FindEmptyCellAndMakeCandiesFall(Queue<Vector3Int> emptyCellIndexQueue)
-    {       
-        Debug.Log($"사탕 드랍 시작!");
-        yield return new WaitForSeconds(0.3f);
-
+    private void EmptyCheck()
+    {
         // 캔디 낙하 로직
         for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
         {
@@ -357,65 +410,102 @@ public class GameBoardManager : MonoBehaviour
                 // 빈 곳 확인
                 if (CellContents[emptyCellIndex].ContainingCandy == null)
                 {
-                    //Debug.Log($"빈 칸 발견! {Grid.GetCellCenterWorld(emptyCellIndex)}");
-                    yield return new WaitForSeconds(0.1f);
-
-                    var candy = FindCandyToFallInColumn(emptyCellIndex);
-                    //Debug.Log($"candy.success: {candy.success}");
-                    if (candy.success)
-                    {
-                        // 캔디 낙하 시작
-                        MakeCandyFall(emptyCellIndex, candy.idx);
-                    }
+                    emptyCells.Add(emptyCellIndex);
                 }
             }
         }
-
-        yield return new WaitForSeconds(0.1f);
-
-        // 생성 작업 시작
-        ActivateSpawners(emptyCellIndexQueue);
-
-        // 새로 생성된 캔디들 낙하 시작
-        MakeSpawnersCandiesFall();
     }
 
-    private void MakeSpawnersCandiesFall()
+    private void Spawn()
     {
-        // 각 Spawner 포인트 아래의 세로 열을 검색. 가장 먼 곳부터 목표로 설정하여 해당 Spawner에서 보유중인 캔디를 낙하. 
-        foreach(Vector3Int spawner in SpawnerContents.Keys)
+        foreach(Vector3Int emptyCell in emptyCells)
         {
-            // Spawner에서 보유중인 캔디를 낙하.
-            Queue<Candy> candies = SpawnerContents[spawner];
-            while (candies.Count > 0)
-            {
-                Vector3Int farthestEmptyCell = GetFarthestEmptyCellInColumnBelow(spawner);
-
-                Candy candy = candies.Dequeue();
-
-                // 캔디 오브젝트 이동
-                candy.transform.DOMove(Grid.GetCellCenterWorld(farthestEmptyCell), 0.5f).SetEase(Ease.OutBounce);
-
-                // 데이터 갱신
-                CellContents[farthestEmptyCell].ContainingCandy = candy;
-                candy.UpdateIndex(farthestEmptyCell);
-
-                //Debug.Log($"Spawner:{spawner}, candy:{candy}, farthestEmptyCell:{farthestEmptyCell}, new candy Index:{candy.CurrentIndex}");
-            }
-        }
-    }
-
-    private void ActivateSpawners(Queue<Vector3Int> emptyCellIndexQueue)
-    {
-        //Debug.Log($"emptyCellIndexQueue.Count:{emptyCellIndexQueue.Count}");
-        while (emptyCellIndexQueue.Count > 0)
-        {
-            Vector3Int emptyCell = emptyCellIndexQueue.Dequeue();
             // emptyCell의 가장 가까운 상단 SpawnerPostition 검색
             Vector3Int closestSpawner = GetClosestSpawner(emptyCell);
             // 새로운 캔디 스폰 지시
             ActivateSpawnerAt(closestSpawner);
         }
+        emptyCells.Clear();
+    }
+
+    private void Fall()
+    {
+        for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
+        {
+            for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
+            {
+                var idx = new Vector3Int(x, y, 0);
+          
+                if (CellContents[idx].ContainingCandy == null)
+                {
+                    // 빈 셀 발견
+                    var candy = FindCandyToFallInColumn(idx);
+                    //Debug.Log($"candy.success:{candy.success}, candy Pos:{Grid.GetCellCenterWorld(candy.idx)}");
+                    if (candy.success)
+                    {
+                        // 캔디 낙하 시작
+                        MakeCandyFall(idx, candy.idx);
+                    }
+                    else
+                    {
+                        // SpawnCell에서 생성된 캔디 낙하 시작
+                        MakeSpawnedCandyFall(idx);
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 윗쪽 셀들을 검색. 가장 먼저 발견되는 캔디의 셀 인덱스를 반환합니다.
+    /// </summary>
+    /// <returns>실패시 success를 false로 반환합니다</returns>
+    private (bool success, Vector3Int idx) FindCandyToFallInColumn(Vector3Int emptyCellIndex)
+    {
+        for (int x = emptyCellIndex.x + 1; x <= m_BoundsInt.xMax; ++x)
+        {
+            if (CellContents[new Vector3Int(x, emptyCellIndex.y)].ContainingCandy != null)
+            {
+                // 성공.
+                return (true, new Vector3Int(x, emptyCellIndex.y));
+            }
+        }
+        // 실패. 
+        return (false, Vector3Int.zero);
+    }
+
+    // 3. Candy 낙하
+    private void MakeCandyFall(Vector3Int emptyCellIndex, Vector3Int candyCellIndex)
+    {
+        Candy movingCandy = CellContents[candyCellIndex].ContainingCandy;
+
+        // 캔디 오브젝트 이동
+        movingCandy.transform.DOMove(Grid.GetCellCenterWorld(emptyCellIndex), 0.5f).SetEase(Ease.OutBounce);
+
+        // 데이터 갱신
+        CellContents[emptyCellIndex].ContainingCandy = movingCandy;
+        CellContents[candyCellIndex].ContainingCandy = null;
+
+        // Candy 객체의 위치 정보 업데이트
+        movingCandy.UpdateIndex(emptyCellIndex);
+    }
+
+    private void MakeSpawnedCandyFall(Vector3Int emptyCellIndex)
+    {
+        // emptyCell의 가장 가까운 상단 SpawnerPostition 검색
+        Vector3Int closestSpawner = GetClosestSpawner(emptyCellIndex);
+
+        if (SpawnerContents[closestSpawner].Count <= 0) return;
+
+        // Spawner가 보유중인 새로 생성된 캔디
+        Candy newCandy = SpawnerContents[closestSpawner].Dequeue();
+
+        // 캔디 오브젝트 이동
+        newCandy.transform.DOMove(Grid.GetCellCenterWorld(emptyCellIndex), 0.5f).SetEase(Ease.OutBounce);
+
+        // 데이터 갱신
+        CellContents[emptyCellIndex].ContainingCandy = newCandy;
+        newCandy.UpdateIndex(emptyCellIndex);
     }
 
     private Vector3Int GetClosestSpawner(Vector3Int idx)
@@ -442,58 +532,21 @@ public class GameBoardManager : MonoBehaviour
         return closestSpawner;
     }
 
-    // 세로 하단을 검색. 비어있는 가장 먼 셀을 가져옴
-    private Vector3Int GetFarthestEmptyCellInColumnBelow(Vector3Int spawnerIndex)
-    {
-        Vector3Int farthestEmptyCell = Vector3Int.zero;
-
-        for (int x = m_BoundsInt.xMax; x >= m_BoundsInt.xMin; --x)
-        {
-            if (x < spawnerIndex.x && CellContents[new Vector3Int(x, spawnerIndex.y)].ContainingCandy == null)
-                farthestEmptyCell = new Vector3Int(x, spawnerIndex.y);
-        }
-
-        return farthestEmptyCell;
-    }
-
-
-    /// <summary>
-    /// 윗쪽 셀들을 검색. 가장 먼저 발견되는 캔디의 셀 인덱스를 반환합니다.
-    /// </summary>
-    /// <returns>실패시 success를 false로 반환합니다</returns>
-    private (bool success, Vector3Int idx) FindCandyToFallInColumn(Vector3Int emptyCellIndex)
-    {
-        for (int x = emptyCellIndex.x; x <= m_BoundsInt.xMax; ++x)
-        {
-            if (CellContents[new Vector3Int(x, emptyCellIndex.y)].ContainingCandy != null)
-            {
-                // 성공.
-                return (true, new Vector3Int(x, emptyCellIndex.y));
-            }
-        }
-        // 실패. 
-        return (false, Vector3Int.zero);
-    }
-
-    // 3. Candy 낙하
-    private void MakeCandyFall(Vector3Int emptyCellIndex, Vector3Int candyCellIndex)
-    {
-        //Debug.Log($"emptyCell:{Grid.GetCellCenterWorld(emptyCellIndex)}, candyCell:{Grid.GetCellCenterWorld(candyCellIndex)}");
-
-        // 캔디 오브젝트 이동
-        CellContents[candyCellIndex].ContainingCandy.transform.DOMove(Grid.GetCellCenterWorld(emptyCellIndex), 0.5f).SetEase(Ease.OutBounce);
-
-        // 데이터 갱신
-        CellContents[emptyCellIndex].ContainingCandy = CellContents[candyCellIndex].ContainingCandy;
-        CellContents[candyCellIndex].ContainingCandy = null;
-    }
-
     // 4. 스왑
-    public void SwapCandies(Vector3Int sourceIndex, Vector3Int targetIndex)
+    public void StartSwap(Vector3Int sourceIndex, Vector3Int targetIndex)
+    {
+        swapSourceIdx = sourceIndex; 
+        swapTargetIdx = targetIndex;
+
+        UpdateState(State.Swap);
+    }
+
+    private void SwapCandies(Vector3Int sourceIndex, Vector3Int targetIndex)
     {
         // 캔디 오브젝트 참조 저장
         Candy sourceCandy = CellContents[sourceIndex].ContainingCandy;
         Candy targetCandy = CellContents[targetIndex].ContainingCandy;
+
         if (sourceCandy == null) return;
 
         if(targetCandy == null)
@@ -517,11 +570,6 @@ public class GameBoardManager : MonoBehaviour
         // CellContents 데이터 갱신
         CellContents[sourceIndex].ContainingCandy = targetCandy;
         CellContents[targetIndex].ContainingCandy = sourceCandy;
-
-        //PrintCellData();
-
-        // 스왑 후 매칭 확인
-        CheckMatches();
     }
 
 
@@ -608,11 +656,18 @@ public class GameBoardManager : MonoBehaviour
         }
     }
 
+    private void UpdateState(State newState)
+    {
+        state = newState;
+        RunStateMachine();
+    }
 
 
     // 디버깅용
     private void PrintCellData()
     {
+        Debug.Log($"======================================");
+
         for (int x = m_BoundsInt.xMax; x >= m_BoundsInt.xMin; --x)
         {
             string row = "";
@@ -627,5 +682,7 @@ public class GameBoardManager : MonoBehaviour
             }
             Debug.Log($"{row}");
         }
+
+        Debug.Log($"======================================");
     }
 }

@@ -4937,12 +4937,8 @@ MonoBehaviour:
   - {fileID: 4714808536152932748, guid: a9400cd1e50299f44972a53990a88d38, type: 3}
   - {fileID: -4455584130648811357, guid: 5be9b49ae6c0911429da754cd2393365, type: 3}
   - {fileID: -37047300646017266, guid: c07a8bee81284fe4a9cf75324b842147, type: 3}
-  - {fileID: -8752129634427230228, guid: 627fcf72578b12d418bccdca26614e85, type: 3}
-  - {fileID: -916300463314782473, guid: 305155bba07ca2147878c69b6a7aafe7, type: 3}
-  - {fileID: -2427480113711135050, guid: 842abcf204f80e447932bae923b1bb64, type: 3}
-  - {fileID: 2996360417161566223, guid: 7927b539920187c4f8a028997d2a307d, type: 3}
-  - {fileID: -2908785150762925049, guid: f922f829d755c924fa530ed48f5ff640, type: 3}
   ScoreManager: {fileID: 0}
+  state: 0
 --- !u!4 &1204279939
 Transform:
   m_ObjectHideFlags: 0
@@ -8711,7 +8707,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b1a02371d668c848932c880be77bb7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dragThreshold: 30
   isSwapping: 0
 --- !u!4 &2097332578
 Transform:
