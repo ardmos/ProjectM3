@@ -389,6 +389,7 @@ MonoBehaviour:
   - {fileID: 2871302863263314747}
   - {fileID: 7813600140868022217}
   - {fileID: 1297175552960831802}
+  StageButton: {fileID: 7105691607089526522}
 --- !u!1 &5301852509895281648
 GameObject:
   m_ObjectHideFlags: 0

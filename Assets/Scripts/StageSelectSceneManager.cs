@@ -34,6 +34,6 @@ public class StageSelectSceneManager : MonoBehaviour
 
     private void InitButtons()
     {
-        //ExitButton.onClick.AddListener();
+        ExitButton.onClick.AddListener(()=> LoadSceneManager.Load(LoadSceneManager.Scene.TitleScene));
     }
 }

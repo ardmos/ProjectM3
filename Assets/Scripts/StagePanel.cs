@@ -23,6 +23,7 @@ public class StagePanel : MonoBehaviour
             StarObjects[i].SetActive(i < starScore);
         }
 
-        // StageButton
+        LoadSceneManager.Scene targetScene = (LoadSceneManager.Scene)((int)LoadSceneManager.Scene.Level1 + stageLevel -1);
+        StageButton.onClick.AddListener(() => LoadSceneManager.Load(targetScene));
     }
 }

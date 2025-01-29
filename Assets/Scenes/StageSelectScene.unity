@@ -1504,6 +1504,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: dbc134d786206cb47993320b3504bc45, type: 3}
   StagePanelPrefab: {fileID: 3412441539953372762, guid: 28a255225baa3354e8f4a86f96f79377, type: 3}
   Grid: {fileID: 2014617647}
+  ExitButton: {fileID: 185682701}
 --- !u!4 &2060165003
 Transform:
   m_ObjectHideFlags: 0
