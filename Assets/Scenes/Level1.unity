@@ -2103,7 +2103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeee35bb843e8a746b2dbc9017ecec0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameState: 0
+  state: 0
 --- !u!4 &535182541
 Transform:
   m_ObjectHideFlags: 0
@@ -2434,7 +2434,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &710907371
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2454,7 +2454,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 88.80371}
+  m_AnchoredPosition: {x: 0, y: -175}
   m_SizeDelta: {x: 390.9668, y: 50.9951}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &710907372
@@ -7380,7 +7380,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1678800230
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7763,7 +7763,7 @@ MonoBehaviour:
     count: 3
   - candyType: 3
     count: 3
-  TargetScore: 1e0000005a00000078000000
+  TargetScore: 6400000096000000c8000000
   MoveMaxCount: 20
   CandyPrefabs:
   - {fileID: -948302693355730056, guid: 36a7f26c2e11ea546bd9e9c5e8f0e167, type: 3}
@@ -8385,8 +8385,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d39b553e5a96534ea920b498fea9403, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetScore: 0
-  currentScoreText: {fileID: 1300461211}
+  CurrentScoreText: {fileID: 1300461211}
+  StarObjects:
+  - {fileID: 588422891}
+  - {fileID: 1004670949}
+  - {fileID: 1678800229}
   currentScore: 0
 --- !u!4 &1933397780
 Transform:

@@ -68,6 +68,7 @@ public class GameBoardManager : MonoBehaviour
     private List<Vector3Int> emptyCells = new List<Vector3Int>();
 
     public event Action OnMoved;
+    public event Action<List<Candy>> OnPopped;
 
     private void Awake()
     {
@@ -112,7 +113,8 @@ public class GameBoardManager : MonoBehaviour
                     UpdateState(State.Idle);
                 break;
             case State.Pop:
-                PopMatches();
+                OnPopped.Invoke(matchedCandies);
+                PopMatches();      
                 // 빈칸 체크 시작
                 UpdateState(State.EmptyCheck);
                 break;
@@ -130,11 +132,10 @@ public class GameBoardManager : MonoBehaviour
                 break;
             case State.Swap:
                 // 스왑 가능여부 체크 로직이 필요함
-
-
-                OnMoved.Invoke(); // 무브 카운트 증가
-
+               
                 SwapCandies(swapSourceIdx, swapTargetIdx);
+                // 스왑 후 무브 카운트 증가
+                OnMoved.Invoke();
                 // 스왑 후 매칭 확인
                 UpdateState(State.MatchCheck);
                 break;
@@ -389,6 +390,8 @@ public class GameBoardManager : MonoBehaviour
                 }
             }
         }
+
+        matchedCandies.Distinct().ToList();
     }
     /// <summary>
     /// 매치 캔디들 제거
@@ -691,5 +694,16 @@ public class GameBoardManager : MonoBehaviour
         }
 
         Debug.Log($"======================================");
+    }
+}
+
+// 캔디 Pop시 발생하는 이벤트 인자 클래스 정의
+public class CandyPoppedEventArgs : EventArgs
+{
+    public List<Candy> PoppedCandies { get; }
+
+    public CandyPoppedEventArgs(List<Candy> poppedCandies)
+    {
+        PoppedCandies = poppedCandies;
     }
 }

@@ -7,34 +7,58 @@ using UnityEngine.UI;
 
 public class ScoreManager : MonoBehaviour
 {
-    public const int TARGET_SCORE_STAGE1 = 150;
+    public TextMeshProUGUI CurrentScoreText;
+    public GameObject[] StarObjects = new GameObject[3];
 
-    [SerializeField] private int targetScore = 0;
-
-    [SerializeField] private TextMeshProUGUI currentScoreText;
     [SerializeField] private int currentScore = 0;
 
     private void Start()
     {
-        targetScore = TARGET_SCORE_STAGE1;
+        AllStarsOff();
+
+        GameBoardManager.Instance.OnPopped += AddScore;
     }
 
-    public void AddCurrentScore(int value)
+    private void AddScore(List<Candy> poppedCandies)
     {
-        Debug.Log($"value:{value}");
-        currentScore += value;
-        currentScoreText.text = $"{currentScore}";
-
-        CheckScore();
-    }
-
-    private void CheckScore()
-    {
-        if (currentScore >= targetScore)
+        foreach (Candy poppedCandy in poppedCandies)
         {
-            // 스테이지 클리어!
-            GameManager.Instance.UpdateState(GameManager.State.Win);
+            currentScore += poppedCandy.CandyScore;
         }
+
+        CurrentScoreText.text = $"{currentScore}";
+
+        CheckStarScore();
+    }
+
+    private void CheckStarScore()
+    {
+        int[] targetScores = LevelData.Instance.TargetScore;
+        int starsEarned = 0;
+
+        for (int i = 0; i < targetScores.Length; i++)
+        {
+            if (currentScore >= targetScores[i])
+            {
+                starsEarned = i + 1;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        for (int i = 0; i < StarObjects.Length; i++)
+        {
+            StarObjects[i].SetActive(i < starsEarned);
+        }
+    }
+
+    private void AllStarsOff()
+    {
+        StarObjects[2].SetActive(false);
+        StarObjects[1].SetActive(false);
+        StarObjects[0].SetActive(false);
     }
 
     public int GetCurrentScore() => currentScore;

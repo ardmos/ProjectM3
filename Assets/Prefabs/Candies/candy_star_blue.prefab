@@ -100,6 +100,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CandyType: 5
+  CandyScore: 10
 --- !u!114 &-8943132860575351923
 MonoBehaviour:
   m_ObjectHideFlags: 0
