@@ -92,7 +92,7 @@ public class GameBoardManager : MonoBehaviour
     }
 
 
-    private void RunStateMachine()
+    private IEnumerator RunStateMachine()
     {
         switch (state)
         {
@@ -136,6 +136,8 @@ public class GameBoardManager : MonoBehaviour
                 SwapCandies(swapSourceIdx, swapTargetIdx);
                 // 스왑 후 무브 카운트 증가
                 OnMoved.Invoke();
+                // 매칭 전 딜레이
+                yield return new WaitForSeconds(0.5f);
                 // 스왑 후 매칭 확인
                 UpdateState(State.MatchCheck);
                 break;
@@ -670,7 +672,7 @@ public class GameBoardManager : MonoBehaviour
     private void UpdateState(State newState)
     {
         state = newState;
-        RunStateMachine();
+        StartCoroutine(RunStateMachine());
     }
 
 
