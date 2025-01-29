@@ -4169,7 +4169,7 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 0
-  - first: {x: 3, y: -2, z: 0}
+  - first: {x: 1, y: -2, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 0
@@ -4229,7 +4229,7 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 0
-  - first: {x: 3, y: -1, z: 0}
+  - first: {x: 1, y: -1, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 0
@@ -4289,7 +4289,7 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 0
-  - first: {x: 3, y: 0, z: 0}
+  - first: {x: 1, y: 0, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 0
@@ -4349,7 +4349,7 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 0
-  - first: {x: 3, y: 1, z: 0}
+  - first: {x: 1, y: 1, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 0
@@ -4409,7 +4409,7 @@ Tilemap:
       m_TileObjectToInstantiateIndex: 65535
       dummyAlignment: 0
       m_AllTileFlags: 0
-  - first: {x: 3, y: 2, z: 0}
+  - first: {x: 1, y: 2, z: 0}
     second:
       serializedVersion: 2
       m_TileIndex: 0
@@ -4456,7 +4456,7 @@ Tilemap:
   m_AnimationFrameRate: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Origin: {x: -4, y: -4, z: 0}
-  m_Size: {x: 8, y: 9, z: 1}
+  m_Size: {x: 10, y: 9, z: 1}
   m_TileAnchor: {x: 0.5, y: 0.5, z: 0}
   m_TileOrientation: 0
   m_TileOrientationMatrix:
@@ -4931,13 +4931,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SpawnerPosition: []
-  CandyPrefabs:
-  - {fileID: -948302693355730056, guid: 36a7f26c2e11ea546bd9e9c5e8f0e167, type: 3}
-  - {fileID: 2856706145262520020, guid: d0f9a58ee5f63e346be1b9908d33d551, type: 3}
-  - {fileID: 4714808536152932748, guid: a9400cd1e50299f44972a53990a88d38, type: 3}
-  - {fileID: -4455584130648811357, guid: 5be9b49ae6c0911429da754cd2393365, type: 3}
-  - {fileID: -37047300646017266, guid: c07a8bee81284fe4a9cf75324b842147, type: 3}
-  ScoreManager: {fileID: 0}
+  ScoreManager: {fileID: 1933397779}
   state: 0
 --- !u!4 &1204279939
 Transform:
@@ -7730,6 +7724,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1731658569}
   m_CullTransparentMesh: 1
+--- !u!1 &1756860100
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1756860102}
+  - component: {fileID: 1756860101}
+  m_Layer: 0
+  m_Name: Level Data
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1756860101
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756860100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6efde83f17e2a194bb02cf5e119d4d25, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Level: 0
+  TargetList:
+  - candyType: 0
+    count: 3
+  - candyType: 1
+    count: 3
+  - candyType: 2
+    count: 3
+  - candyType: 3
+    count: 3
+  TargetScore: 1e0000005a00000078000000
+  MoveMaxCount: 30
+  CandyPrefabs:
+  - {fileID: -948302693355730056, guid: 36a7f26c2e11ea546bd9e9c5e8f0e167, type: 3}
+  - {fileID: 2856706145262520020, guid: d0f9a58ee5f63e346be1b9908d33d551, type: 3}
+  - {fileID: 4714808536152932748, guid: a9400cd1e50299f44972a53990a88d38, type: 3}
+  - {fileID: -4455584130648811357, guid: 5be9b49ae6c0911429da754cd2393365, type: 3}
+  - {fileID: -37047300646017266, guid: c07a8bee81284fe4a9cf75324b842147, type: 3}
+--- !u!4 &1756860102
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756860100}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 698.1996, y: 1856.7953, z: -18.632044}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1794973319
 GameObject:
   m_ObjectHideFlags: 0
@@ -9196,6 +9252,7 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 519420032}
+  - {fileID: 1756860102}
   - {fileID: 1585403993}
   - {fileID: 375059061}
   - {fileID: 1576503059}

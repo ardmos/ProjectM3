@@ -42,7 +42,7 @@ public class GameBoardManager : MonoBehaviour
     // 보드의 각 셀 정보를 저장하는 딕셔너리
     public Dictionary<Vector3Int, GameBoardCell> CellContents = new();
     // 캔디 프리팹들
-    public Candy[] CandyPrefabs;
+    //public Candy[] CandyPrefabs;
     
     public ScoreManager ScoreManager;
 
@@ -66,6 +66,8 @@ public class GameBoardManager : MonoBehaviour
 
     // 빈칸 검색 결과 변수
     private List<Vector3Int> emptyCells = new List<Vector3Int>();
+
+    public event Action OnSwap;
 
     private void Awake()
     {
@@ -169,7 +171,7 @@ public class GameBoardManager : MonoBehaviour
     {
         //candy type과 candy prefab 객체를 매핑합니다. 
         m_CandyLookup = new Dictionary<int, Candy>();
-        foreach (var candy in CandyPrefabs)
+        foreach (var candy in LevelData.Instance.CandyPrefabs)
         {
             m_CandyLookup.Add(candy.CandyType, candy);
         }
@@ -609,7 +611,7 @@ public class GameBoardManager : MonoBehaviour
     private Candy NewCandyAt(Vector3Int cell, Candy candyPrefab)
     {
         if (candyPrefab == null)
-            candyPrefab = CandyPrefabs[Random.Range(0, CandyPrefabs.Length)];
+            candyPrefab = LevelData.Instance.CandyPrefabs[Random.Range(0, LevelData.Instance.CandyPrefabs.Length)];
 
         // 보드가 초기화된 상태인지 확인 후 진행합니다.  
         if (CellContents[cell].ContainingCandy != null)
@@ -643,7 +645,7 @@ public class GameBoardManager : MonoBehaviour
     private void ActivateSpawnerAt(Vector3Int closestSpawner)
     {
         //Debug.Log($"closestSpawner:{closestSpawner}, worldPos:{m_Grid.GetCellCenterWorld(closestSpawner)}");
-        var candy = Instantiate(CandyPrefabs[Random.Range(0, CandyPrefabs.Length)], m_Grid.GetCellCenterWorld(closestSpawner), Quaternion.identity);
+        var candy = Instantiate(LevelData.Instance.CandyPrefabs[Random.Range(0, LevelData.Instance.CandyPrefabs.Length)], m_Grid.GetCellCenterWorld(closestSpawner), Quaternion.identity);
         candy.Init(closestSpawner);
 
         if (SpawnerContents.ContainsKey(closestSpawner))
