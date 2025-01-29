@@ -627,7 +627,8 @@ public class GameBoardManager : MonoBehaviour
             Destroy(CellContents[cell].ContainingCandy.gameObject);
         }
 
-        var candy = Instantiate(candyPrefab, Grid.GetCellCenterWorld(cell), Quaternion.identity);
+        var candy = Instantiate(candyPrefab, Grid.GetCellCenterWorld(new Vector3Int(m_BoundsInt.xMin, m_BoundsInt.yMin)), Quaternion.identity);
+        candy.transform.DOMove(Grid.GetCellCenterWorld(cell), 0.5f).SetEase(Ease.OutBounce);
         CellContents[cell].ContainingCandy = candy;
         candy.Init(cell);
 
