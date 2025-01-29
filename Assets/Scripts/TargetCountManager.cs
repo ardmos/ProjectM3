@@ -1,32 +1,53 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting.ReorderableList;
 using UnityEngine;
 
 public class TargetCountManager : MonoBehaviour
 {
-    [SerializeField] private RectTransform targetGrid;
-    [SerializeField] private Target targetPrefab;
+    public RectTransform TargetGrid;
+    public Target TargetPrefab;
 
-    [SerializeField] Sprite[] candySprites;
+    [SerializeField] private Sprite[] candySprites;
+    [SerializeField] private List<Target> targets;
 
     void Start()
     {
-        //Level1();
+        GameBoardManager.Instance.OnPopped += Instance_OnPopped;
+
+        InitTargetPanel();
     }
 
-    private void Level1()
+    private void InitTargetPanel()
     {
-        int level1MissionCount = 4;
-        for(int i = 0; i < level1MissionCount; i++)
+        foreach (TargetData target in LevelData.Instance.TargetList)
         {
-            Target targetObject = Instantiate(targetPrefab, targetGrid);
-            //targetObject.
+            Target targetObject = Instantiate(TargetPrefab, TargetGrid);
+            targetObject.InitTarget(candySprites[(int)target.CandyType], target.CandyType, target.Count);
+            targets.Add(targetObject);
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Instance_OnPopped(List<Candy> poppedCandies)
     {
-        
+        bool allTargetsClear = true;
+
+        foreach (Candy candy in poppedCandies)
+        {
+            foreach (Target target in targets)
+            {
+                if (!target.Clear && target.CandyType == candy.CandyType)
+                {
+                    target.DecreaseTargetCount();
+                    allTargetsClear &= target.Clear; // 현재 타겟이 클리어된 경우를 체크
+                }
+            }
+        }
+
+        if (allTargetsClear)
+        {
+            // 스테이지 클리어!
+            GameManager.Instance.UpdateState(GameManager.State.Win);
+        }
     }
 }

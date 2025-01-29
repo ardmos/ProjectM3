@@ -53,7 +53,7 @@ public class GameBoardManager : MonoBehaviour
     private BoundsInt m_BoundsInt;
 
     // Áª Å¸ÀÔ°ú ½ÇÁ¦ Gem °´Ã¼¸¦ ¸ÅÇÎÇÏ´Â µñ¼Å³Ê¸®
-    private Dictionary<int, Candy> m_CandyLookup;
+    private Dictionary<CandyType, Candy> m_CandyLookup;
 
     public State state = State.Init;
 
@@ -176,7 +176,7 @@ public class GameBoardManager : MonoBehaviour
     private void InitializeCandyLookup()
     {
         //candy type°ú candy prefab °´Ã¼¸¦ ¸ÅÇÎÇÕ´Ï´Ù. 
-        m_CandyLookup = new Dictionary<int, Candy>();
+        m_CandyLookup = new Dictionary<CandyType, Candy>();
         foreach (var candy in LevelData.Instance.CandyPrefabs)
         {
             m_CandyLookup.Add(candy.CandyType, candy);
@@ -199,22 +199,22 @@ public class GameBoardManager : MonoBehaviour
 
                 var availableCandies = m_CandyLookup.Keys.ToList();
 
-                int leftGemType = -1;
-                int bottomGemType = -1;
-                int rightGemType = -1;
-                int topGemType = -1;
+                int leftCandyType = -1;
+                int bottomCandyType = -1;
+                int rightCandyType = -1;
+                int topCandyType = -1;
 
                 //check if there is two gem of the same type of the left
                 if (CellContents.TryGetValue(idx + new Vector3Int(-1, 0, 0), out var leftContent) &&
                     leftContent.ContainingCandy != null)
                 {
-                    leftGemType = leftContent.ContainingCandy.CandyType;
+                    leftCandyType = (int)leftContent.ContainingCandy.CandyType;
 
                     if (CellContents.TryGetValue(idx + new Vector3Int(-2, 0, 0), out var leftLeftContent) &&
-                        leftLeftContent.ContainingCandy != null && leftGemType == leftLeftContent.ContainingCandy.CandyType)
+                        leftLeftContent.ContainingCandy != null && leftCandyType == (int)leftLeftContent.ContainingCandy.CandyType)
                     {
                         //we have two gem of a given type on the left, so we can't ue that type anymore
-                        availableCandies.Remove(leftGemType);
+                        availableCandies.Remove((CandyType)leftCandyType);
                     }
                 }
 
@@ -222,24 +222,24 @@ public class GameBoardManager : MonoBehaviour
                 if (CellContents.TryGetValue(idx + new Vector3Int(0, -1, 0), out var bottomContent) &&
                     bottomContent.ContainingCandy != null)
                 {
-                    bottomGemType = bottomContent.ContainingCandy.CandyType;
+                    bottomCandyType = (int)bottomContent.ContainingCandy.CandyType;
 
                     if (CellContents.TryGetValue(idx + new Vector3Int(0, -2, 0), out var bottomBottomContent) &&
-                        bottomBottomContent.ContainingCandy != null && bottomGemType == bottomBottomContent.ContainingCandy.CandyType)
+                        bottomBottomContent.ContainingCandy != null && bottomCandyType == (int)bottomBottomContent.ContainingCandy.CandyType)
                     {
                         //we have two gem of a given type on the bottom, so we can't ue that type anymore
-                        availableCandies.Remove(bottomGemType);
+                        availableCandies.Remove((CandyType)bottomCandyType);
                     }
 
-                    if (leftGemType != -1 && leftGemType == bottomGemType)
+                    if (leftCandyType != -1 && leftCandyType == bottomCandyType)
                     {
                         //if the left and bottom gem are the same type, we need to check if the bottom left gem is ALSO
                         //of the same type, as placing that type here would create a square, which is a valid match
                         if (CellContents.TryGetValue(idx + new Vector3Int(-1, -1, 0), out var bottomLeftContent) &&
-                            bottomLeftContent.ContainingCandy != null && bottomGemType == leftGemType)
+                            bottomLeftContent.ContainingCandy != null && bottomCandyType == leftCandyType)
                         {
                             //we already have a corner of gem on left, bottom left and bottom position, so remove that type
-                            availableCandies.Remove(leftGemType);
+                            availableCandies.Remove((CandyType)leftCandyType);
                         }
                     }
                 }
@@ -251,28 +251,28 @@ public class GameBoardManager : MonoBehaviour
                 if (CellContents.TryGetValue(idx + new Vector3Int(1, 0, 0), out var rightContent) &&
                     rightContent.ContainingCandy != null)
                 {
-                    rightGemType = rightContent.ContainingCandy.CandyType;
+                    rightCandyType = (int)rightContent.ContainingCandy.CandyType;
 
                     //we have the same type on left and right, so placing that type here would create a 3 line
-                    if (rightGemType != -1 && leftGemType == rightGemType)
+                    if (rightCandyType != -1 && leftCandyType == rightCandyType)
                     {
-                        availableCandies.Remove(rightGemType);
+                        availableCandies.Remove((CandyType)rightCandyType);
                     }
 
                     if (CellContents.TryGetValue(idx + new Vector3Int(2, 0, 0), out var rightRightContent) &&
-                        rightRightContent.ContainingCandy != null && rightGemType == rightRightContent.ContainingCandy.CandyType)
+                        rightRightContent.ContainingCandy != null && rightCandyType == (int)rightRightContent.ContainingCandy.CandyType)
                     {
                         //we have two gem of a given type on the right, so we can't ue that type anymore
-                        availableCandies.Remove(rightGemType);
+                        availableCandies.Remove((CandyType)rightCandyType);
                     }
 
                     //right and bottom gem are the same, check the bottom right to avoid creating a square
-                    if (rightGemType != -1 && rightGemType == bottomGemType)
+                    if (rightCandyType != -1 && rightCandyType == bottomCandyType)
                     {
                         if (CellContents.TryGetValue(idx + new Vector3Int(1, -1, 0), out var bottomRightContent) &&
-                            bottomRightContent.ContainingCandy != null && bottomRightContent.ContainingCandy.CandyType == rightGemType)
+                            bottomRightContent.ContainingCandy != null && (int)bottomRightContent.ContainingCandy.CandyType == rightCandyType)
                         {
-                            availableCandies.Remove(rightGemType);
+                            availableCandies.Remove((CandyType)rightCandyType);
                         }
                     }
                 }
@@ -281,38 +281,38 @@ public class GameBoardManager : MonoBehaviour
                 if (CellContents.TryGetValue(idx + new Vector3Int(0, 1, 0), out var topContent) &&
                     topContent.ContainingCandy != null)
                 {
-                    topGemType = topContent.ContainingCandy.CandyType;
+                    topCandyType = (int)topContent.ContainingCandy.CandyType;
 
                     //we have the same type on top and bottom, so placing that type here would create a 3 line
-                    if (topGemType != -1 && topGemType == bottomGemType)
+                    if (topCandyType != -1 && topCandyType == bottomCandyType)
                     {
-                        availableCandies.Remove(topGemType);
+                        availableCandies.Remove((CandyType)topCandyType);
                     }
 
                     if (CellContents.TryGetValue(idx + new Vector3Int(0, 1, 0), out var topTopContent) &&
-                        topTopContent.ContainingCandy != null && topGemType == topTopContent.ContainingCandy.CandyType)
+                        topTopContent.ContainingCandy != null && topCandyType == (int)topTopContent.ContainingCandy.CandyType)
                     {
                         //we have two gem of a given type on the top, so we can't ue that type anymore
-                        availableCandies.Remove(topGemType);
+                        availableCandies.Remove((CandyType)topCandyType);
                     }
 
                     //right and top gem are the same, check the top right to avoid creating a square
-                    if (topGemType != -1 && topGemType == rightGemType)
+                    if (topCandyType != -1 && topCandyType == rightCandyType)
                     {
                         if (CellContents.TryGetValue(idx + new Vector3Int(1, 1, 0), out var topRightContent) &&
-                            topRightContent.ContainingCandy != null && topRightContent.ContainingCandy.CandyType == topGemType)
+                            topRightContent.ContainingCandy != null && (int)topRightContent.ContainingCandy.CandyType == topCandyType)
                         {
-                            availableCandies.Remove(topGemType);
+                            availableCandies.Remove((CandyType)topCandyType);
                         }
                     }
 
                     //left and top gem are the same, check the top left to avoid creating a square
-                    if (topGemType != -1 && topGemType == leftGemType)
+                    if (topCandyType != -1 && topCandyType == leftCandyType)
                     {
                         if (CellContents.TryGetValue(idx + new Vector3Int(-1, 1, 0), out var topLeftContent) &&
-                            topLeftContent.ContainingCandy != null && topLeftContent.ContainingCandy.CandyType == topGemType)
+                            topLeftContent.ContainingCandy != null && (int)topLeftContent.ContainingCandy.CandyType == topCandyType)
                         {
-                            availableCandies.Remove(topGemType);
+                            availableCandies.Remove((CandyType)topCandyType);
                         }
                     }
                 }

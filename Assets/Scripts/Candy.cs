@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 
 public class Candy : MonoBehaviour
 {
-    public int CandyType;
+    public CandyType CandyType;
     public int CandyScore;
 
     //public Sprite UISprite; 아이템 효과?

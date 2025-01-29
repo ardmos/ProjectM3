@@ -1,26 +1,38 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 
 public class Target : MonoBehaviour
 {
-    [SerializeField] private Image image;
+    public Image TargetCandyImage;
+    public Image TargetClearImage;
+    public TextMeshProUGUI TargetCountText;
+    public CandyType CandyType;
+    public int TargetCount;
+    public bool Clear = false;
 
-    // Start is called before the first frame update
-    void Start()
+    public void InitTarget(Sprite targetCandyImage, CandyType candyType, int targetCount)
     {
-        
+        TargetCandyImage.sprite = targetCandyImage;
+        TargetClearImage.enabled = false;
+        TargetCountText.text = targetCount.ToString();
+        CandyType = candyType;
+        TargetCount = targetCount;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void DecreaseTargetCount()
     {
-        
-    }
+        --TargetCount;
 
-    public void SetImage(Sprite sprite)
-    {
-        image.sprite = sprite;
+        TargetCountText.text = TargetCount.ToString();
+
+        if (TargetCount <= 0)
+        {
+            TargetClearImage.enabled = true;
+            Clear = true;
+        }
     }
 }
