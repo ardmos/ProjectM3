@@ -30,8 +30,6 @@ public class TargetCountManager : MonoBehaviour
 
     private void Instance_OnPopped(List<Candy> poppedCandies)
     {
-        bool allTargetsClear = true;
-
         foreach (Candy candy in poppedCandies)
         {
             foreach (Target target in targets)
@@ -39,8 +37,16 @@ public class TargetCountManager : MonoBehaviour
                 if (!target.Clear && target.CandyType == candy.CandyType)
                 {
                     target.DecreaseTargetCount();
-                    allTargetsClear &= target.Clear; // 현재 타겟이 클리어된 경우를 체크
                 }
+            }
+        }
+
+        bool allTargetsClear = true;
+        foreach (Target target in targets)
+        {
+            if (!target.Clear)
+            {
+                allTargetsClear = false;
             }
         }
 
