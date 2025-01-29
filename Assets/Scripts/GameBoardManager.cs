@@ -43,7 +43,7 @@ public class GameBoardManager : MonoBehaviour
     public Dictionary<Vector3Int, GameBoardCell> CellContents = new();
     // 캔디 프리팹들
     //public Candy[] CandyPrefabs;
-    
+
     public ScoreManager ScoreManager;
 
     public Grid Grid => m_Grid; // Tilemap의 부모 그리드
@@ -114,7 +114,7 @@ public class GameBoardManager : MonoBehaviour
                 break;
             case State.Pop:
                 OnPopped.Invoke(matchedCandies);
-                PopMatches();      
+                PopMatches();
                 // 빈칸 체크 시작
                 UpdateState(State.EmptyCheck);
                 break;
@@ -132,7 +132,7 @@ public class GameBoardManager : MonoBehaviour
                 break;
             case State.Swap:
                 // 스왑 가능여부 체크 로직이 필요함
-               
+
                 SwapCandies(swapSourceIdx, swapTargetIdx);
                 // 스왑 후 무브 카운트 증가
                 OnMoved.Invoke();
@@ -363,11 +363,11 @@ public class GameBoardManager : MonoBehaviour
         // 수직 검사
         for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
         {
-            for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax-2; ++y)
+            for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax - 2; ++y)
             {
                 Vector3Int idx = new Vector3Int(x, y, 0);
                 Vector3Int idx2 = new Vector3Int(x, y + 1, 0);
-                Vector3Int idx3 = new Vector3Int(x , y + 2, 0);
+                Vector3Int idx3 = new Vector3Int(x, y + 2, 0);
 
                 //Debug.Log($"{Grid.GetCellCenterWorld(idx)}의 캔디를 기준으로 수직 확인");
 
@@ -428,7 +428,7 @@ public class GameBoardManager : MonoBehaviour
 
     private void Spawn()
     {
-        foreach(Vector3Int emptyCell in emptyCells)
+        foreach (Vector3Int emptyCell in emptyCells)
         {
             // emptyCell의 가장 가까운 상단 SpawnerPostition 검색
             Vector3Int closestSpawner = GetClosestSpawner(emptyCell);
@@ -445,7 +445,7 @@ public class GameBoardManager : MonoBehaviour
             for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
             {
                 var idx = new Vector3Int(x, y, 0);
-          
+
                 if (CellContents[idx].ContainingCandy == null)
                 {
                     // 빈 셀 발견
@@ -545,7 +545,7 @@ public class GameBoardManager : MonoBehaviour
     // 4. 스왑
     public void StartSwap(Vector3Int sourceIndex, Vector3Int targetIndex)
     {
-        swapSourceIdx = sourceIndex; 
+        swapSourceIdx = sourceIndex;
         swapTargetIdx = targetIndex;
 
         UpdateState(State.Swap);
@@ -559,7 +559,7 @@ public class GameBoardManager : MonoBehaviour
 
         if (sourceCandy == null) return;
 
-        if(targetCandy == null)
+        if (targetCandy == null)
         {
             // 위치 스왑 애니메이션
             sourceCandy.transform.DOMove(Grid.GetCellCenterWorld(targetIndex), 0.5f).SetEase(Ease.OutBounce);
@@ -598,8 +598,8 @@ public class GameBoardManager : MonoBehaviour
 
         if (!Instance.CellContents.ContainsKey(cellPosition))
             Instance.CellContents.Add(cellPosition, new GameBoardCell());
-        
-        if(startingCandy != null)
+
+        if (startingCandy != null)
             Instance.NewCandyAt(cellPosition, startingCandy);
     }
 
@@ -694,16 +694,5 @@ public class GameBoardManager : MonoBehaviour
         }
 
         Debug.Log($"======================================");
-    }
-}
-
-// 캔디 Pop시 발생하는 이벤트 인자 클래스 정의
-public class CandyPoppedEventArgs : EventArgs
-{
-    public List<Candy> PoppedCandies { get; }
-
-    public CandyPoppedEventArgs(List<Candy> poppedCandies)
-    {
-        PoppedCandies = poppedCandies;
     }
 }

@@ -10,17 +10,15 @@ public class Candy : MonoBehaviour
     public CandyType CandyType;
     public int CandyScore;
 
-    //public Sprite UISprite; 아이템 효과?
-    //When a gem get added to a match, this match get stored here so we can now if this gem is currently in a match and 
-    //cannot be used for anything else.
-    public Match CurrentMatch = null;
-
     public Vector3Int CurrentIndex => m_CurrentIndex;
-    public int HitPoint => m_HitPoints;
     protected Vector3Int m_CurrentIndex;
-    protected int m_HitPoints = 1;
 
-
+    public void Copy(Candy other)
+    {
+        CandyType = other.CandyType;
+        CandyScore = other.CandyScore;
+        m_CurrentIndex = other.m_CurrentIndex;
+    }
 
     public virtual void Init(Vector3Int startIdx)
     {
@@ -39,12 +37,6 @@ public class Candy : MonoBehaviour
     public virtual void Use(Candy swappedCandy, bool isBonus = false)
     {
 
-    }
-
-    public virtual bool Damage(int damage)
-    {
-        m_HitPoints -= damage;
-        return m_HitPoints > 0;
     }
 
     public void Pop()
