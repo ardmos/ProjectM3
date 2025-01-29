@@ -10,6 +10,8 @@ public class StageSelectSceneManager : MonoBehaviour
     public GameObject StagePanelPrefab;
     public RectTransform Grid;
     public Button ExitButton;
+    public Button SettingsButton;
+    public PopupSettingsPanelController PopupSettingsPanelController;
 
     private void Start()
     {
@@ -35,5 +37,9 @@ public class StageSelectSceneManager : MonoBehaviour
     private void InitButtons()
     {
         ExitButton.onClick.AddListener(()=> LoadSceneManager.Load(LoadSceneManager.Scene.TitleScene));
+        SettingsButton.onClick.AddListener(() => {
+            // Settings ÆË¾÷ È°¼ºÈ­
+            PopupSettingsPanelController.Show();
+        });
     }
 }

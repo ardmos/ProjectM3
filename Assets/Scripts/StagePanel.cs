@@ -24,6 +24,7 @@ public class StagePanel : MonoBehaviour
         }
 
         LoadSceneManager.Scene targetScene = (LoadSceneManager.Scene)((int)LoadSceneManager.Scene.Level1 + stageLevel -1);
-        StageButton.onClick.AddListener(() => LoadSceneManager.Load(targetScene));
+        //StageButton.onClick.AddListener(() => LoadSceneManager.Load(targetScene));
+        // 레벨 팝업이 열린 다음 씬 이동하도록!
     }
 }
