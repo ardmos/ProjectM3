@@ -11,17 +11,24 @@ public class MoveCountManager : MonoBehaviour
 
     private void Start()
     {
-        moveCountText.text = $"{moveCount}/{LevelData.Instance.MoveMaxCount}";
+        UpdateMoveCountTextUI(moveCount);
+
+        GameBoardManager.Instance.OnMoved += IncreaseMoveCount;
     }
 
-    public void IncreaseMoveCount()
+    private void IncreaseMoveCount()
     {
         moveCount++;
-        moveCountText.text = $"{moveCount}/{LevelData.Instance.MoveMaxCount}";
+        UpdateMoveCountTextUI(moveCount);
 
-        if(moveCount >= LevelData.Instance.MoveMaxCount)
+        if (moveCount >= LevelData.Instance.MoveMaxCount)
         {
-            GameManager.Instance.SetGameState(GameManager.State.Lose);
+            GameManager.Instance.UpdateState(GameManager.State.Lose);
         }
+    }
+
+    private void UpdateMoveCountTextUI(int moveCount)
+    {
+        moveCountText.text = $"{moveCount}/{LevelData.Instance.MoveMaxCount}";
     }
 }

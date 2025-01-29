@@ -20,7 +20,7 @@ public class GameManager : MonoBehaviour
     public event Action OnWin;
     public event Action OnLose;
 
-    [SerializeField] private State gameState = State.Ready;
+    [SerializeField] private State state = State.Ready;
 
     private void Awake()
     {
@@ -30,21 +30,21 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         // 시작하자마자 터지는것들 스코어 포함 안시키려면 여기서 처리해줘야함
-        SetGameState(State.Play);
+        UpdateState(State.Play);
     }
 
-    public void SetGameState(State newState)
+    public void UpdateState(State newState)
     {
-        gameState = newState;
+        state = newState;
 
         RunStateMachine();
     }
 
-    public State GetGameState() => gameState;
+    public State GetGameState() => state;
 
     private void RunStateMachine()
     {
-        switch (gameState)
+        switch (state)
         {
             case State.Ready:
                 break;

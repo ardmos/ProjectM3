@@ -67,7 +67,7 @@ public class GameBoardManager : MonoBehaviour
     // 빈칸 검색 결과 변수
     private List<Vector3Int> emptyCells = new List<Vector3Int>();
 
-    public event Action OnSwap;
+    public event Action OnMoved;
 
     private void Awake()
     {
@@ -129,6 +129,11 @@ public class GameBoardManager : MonoBehaviour
                 UpdateState(State.MatchCheck);
                 break;
             case State.Swap:
+                // 스왑 가능여부 체크 로직이 필요함
+
+
+                OnMoved.Invoke(); // 무브 카운트 증가
+
                 SwapCandies(swapSourceIdx, swapTargetIdx);
                 // 스왑 후 매칭 확인
                 UpdateState(State.MatchCheck);

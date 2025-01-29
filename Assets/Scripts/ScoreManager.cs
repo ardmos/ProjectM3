@@ -33,7 +33,7 @@ public class ScoreManager : MonoBehaviour
         if (currentScore >= targetScore)
         {
             // 스테이지 클리어!
-            GameManager.Instance.SetGameState(GameManager.State.Win);
+            GameManager.Instance.UpdateState(GameManager.State.Win);
         }
     }
 

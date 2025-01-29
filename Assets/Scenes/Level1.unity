@@ -7764,7 +7764,7 @@ MonoBehaviour:
   - candyType: 3
     count: 3
   TargetScore: 1e0000005a00000078000000
-  MoveMaxCount: 30
+  MoveMaxCount: 20
   CandyPrefabs:
   - {fileID: -948302693355730056, guid: 36a7f26c2e11ea546bd9e9c5e8f0e167, type: 3}
   - {fileID: 2856706145262520020, guid: d0f9a58ee5f63e346be1b9908d33d551, type: 3}
