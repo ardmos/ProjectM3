@@ -16,5 +16,20 @@ public static class LoadSceneManager
     public static void Load(Scene targetScene)
     {
         SceneManager.LoadScene(targetScene.ToString());
+
+        switch (targetScene)
+        {
+            case Scene.TitleScene:
+                SoundManager.Instance.PlayBGM(SoundManager.BGM.TitleScene);
+                break; 
+            case Scene.StageSelectScene:
+                SoundManager.Instance.PlayBGM(SoundManager.BGM.StageSelectScene);
+                break;
+            default:
+                // ∞‘¿”æ¿
+                SoundManager.Instance.PlayBGM(SoundManager.BGM.GameScene);
+                break;
+        }
+        
     }
 }
