@@ -1,7 +1,12 @@
+using System.Collections;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public static class LoadSceneManager 
+public class LoadSceneManager : MonoBehaviour
 {
+    public static LoadSceneManager Instance;
+
     public enum Scene
     {
         TitleScene,
@@ -13,9 +18,25 @@ public static class LoadSceneManager
         Level5
     }
 
-    public static void Load(Scene targetScene)
+    public Image fadeImage;
+    public float fadeDuration = 1f;
+
+    private void Awake()
     {
-        SceneManager.LoadScene(targetScene.ToString());
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    public void Load(Scene targetScene)
+    {
+        StartCoroutine(FadeAndLoadScene(targetScene.ToString()));
 
         switch (targetScene)
         {
@@ -29,7 +50,34 @@ public static class LoadSceneManager
                 // ∞‘¿”æ¿
                 SoundManager.Instance.PlayBGM(SoundManager.BGM.GameScene);
                 break;
+        }   
+    }
+
+    private IEnumerator FadeAndLoadScene(string sceneName)
+    {
+        // ∆‰¿ÃµÂ æ∆øÙ
+        yield return StartCoroutine(Fade(1f));
+
+        // æ¿ ∑ŒµÂ
+        SceneManager.LoadScene(sceneName);
+
+        // ∆‰¿ÃµÂ ¿Œ
+        yield return StartCoroutine(Fade(0f));
+    }
+
+    private IEnumerator Fade(float targetAlpha)
+    {
+        float startAlpha = fadeImage.color.a;
+        float elapsedTime = 0f;
+
+        while (elapsedTime < fadeDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float alpha = Mathf.Lerp(startAlpha, targetAlpha, elapsedTime / fadeDuration);
+            fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, alpha);
+            yield return null;
         }
-        
+
+        fadeImage.color = new Color(fadeImage.color.r, fadeImage.color.g, fadeImage.color.b, targetAlpha);
     }
 }

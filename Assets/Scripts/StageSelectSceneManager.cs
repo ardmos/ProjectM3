@@ -60,7 +60,7 @@ public class StageSelectSceneManager : MonoBehaviour
 
     private void InitButtons()
     {
-        ExitButton.onClick.AddListener(()=> LoadSceneManager.Load(LoadSceneManager.Scene.TitleScene));
+        ExitButton.onClick.AddListener(()=> LoadSceneManager.Instance.Load(LoadSceneManager.Scene.TitleScene));
         SettingsButton.onClick.AddListener(() => {
             // Settings ÆË¾÷ È°¼ºÈ­
             PopupSettingsPanelController.Show();

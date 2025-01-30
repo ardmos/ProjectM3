@@ -33,7 +33,7 @@ public class PopupLevelPanelController : MonoBehaviour
         PlayButton.onClick.AddListener(() =>
         {
             LoadSceneManager.Scene targetScene = (LoadSceneManager.Scene)((int)LoadSceneManager.Scene.Level1 + stageLevel - 1);
-            LoadSceneManager.Load(targetScene);
+            LoadSceneManager.Instance.Load(targetScene);
         });
     }
 
