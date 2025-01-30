@@ -100,6 +100,8 @@ public class GameBoardManager : MonoBehaviour
                 break;
             case State.Pop:
                 OnPopped.Invoke(matchedCandies);
+                // Pop 효과음 재생
+                SoundManager.Instance.PlaySFX(SoundManager.SFX.Pop);
                 PopMatches();
                 // 빈칸 체크 시작
                 UpdateState(State.EmptyCheck);
@@ -118,6 +120,8 @@ public class GameBoardManager : MonoBehaviour
                 break;
             case State.Swap:
                 // 스왑 가능여부 체크 로직이 필요함
+                // 스왑 효과음 재생
+                SoundManager.Instance.PlaySFX(SoundManager.SFX.Swap);
 
                 SwapCandies(swapSourceIdx, swapTargetIdx);
                 // 스왑 후 무브 카운트 증가
@@ -141,6 +145,8 @@ public class GameBoardManager : MonoBehaviour
         InitializeCandyLookup();
         // 보드 생성
         GenerateBoard();
+        // 효과음 재생
+        SoundManager.Instance.PlaySFX(SoundManager.SFX.GenerateCandy);
     }
 
     // 보드 경계 설정

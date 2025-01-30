@@ -50,12 +50,13 @@ public class GameManager : MonoBehaviour
             case State.Play:
                 break;
             case State.Win:
+                // 효과음 재생
+                SoundManager.Instance.PlaySFX(SoundManager.SFX.Win);
                 OnWin.Invoke();
-                // 게임 정지 
-
-                // 승리 팝업 
                 break;
             case State.Lose:
+                // 효과음 재생
+                SoundManager.Instance.PlaySFX(SoundManager.SFX.Lose);
                 OnLose.Invoke(); // Lose시 동작 아직 미구현
                 break;
             default:
