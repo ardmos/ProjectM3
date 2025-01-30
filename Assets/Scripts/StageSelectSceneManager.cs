@@ -1,17 +1,28 @@
 using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 public class StageSelectSceneManager : MonoBehaviour
 {
+    public static StageSelectSceneManager Instance;
+
     public Sprite[] StageImages = new Sprite[4];
     public GameObject StagePanelPrefab;
     public RectTransform Grid;
     public Button ExitButton;
     public Button SettingsButton;
     public PopupSettingsPanelController PopupSettingsPanelController;
+    public PopupLevelPanelController PopupLevelPanelController;
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     private void Start()
     {
@@ -23,7 +34,11 @@ public class StageSelectSceneManager : MonoBehaviour
     private void InitStageListPanel()
     {
         var PlayerData = PlayerDataManager.Instance.PlayerData;
+        var sortedDict = PlayerData.StageScorePairs.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
+        
 
+
+        // 깨본적 있는 스테이지들
         foreach (var stageScorePair in PlayerData.StageScorePairs)
         {
             int stage = stageScorePair.Key;
@@ -31,6 +46,15 @@ public class StageSelectSceneManager : MonoBehaviour
 
             StagePanel stagePanel = Instantiate(StagePanelPrefab, Grid).GetComponent<StagePanel>();
             stagePanel.InitPanel(stage, StageImages[stage-1], $"Level {stage}", score);
+        }
+
+        // 새로 열리는 스테이지
+        int nextLevel = sortedDict.Keys.LastOrDefault()+1;
+        int lastScore = sortedDict.Values.LastOrDefault();
+        if (lastScore >= 2)
+        {         
+            StagePanel stagePanel = Instantiate(StagePanelPrefab, Grid).GetComponent<StagePanel>();
+            stagePanel.InitPanel(nextLevel, StageImages[nextLevel%StageImages.Length], $"Level {nextLevel}", 0);
         }
     }
 
