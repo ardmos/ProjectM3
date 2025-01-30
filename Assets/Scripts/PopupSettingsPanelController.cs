@@ -11,8 +11,8 @@ public class PopupSettingsPanelController : MonoBehaviour
 
     private void Start()
     {
-        // 슬라이더들은 사운드매니저 구현 후 기능구현. 
-
+        MusicSlider.onValueChanged.AddListener(delegate { SoundManager.Instance.UpdateBGMVolume(MusicSlider.value); });
+        SoundSlider.onValueChanged.AddListener(delegate { SoundManager.Instance.UpdateSFXVolume(SoundSlider.value); });
         CloseButton.AddClickListener(Hide);
 
         Hide();
@@ -21,6 +21,9 @@ public class PopupSettingsPanelController : MonoBehaviour
     public void Show()
     {
         gameObject.SetActive(true);
+
+        MusicSlider.value = SoundManager.Instance.GetBGMVolume();
+        SoundSlider.value = SoundManager.Instance.GetSFXVolume();
     }
 
     public void Hide()

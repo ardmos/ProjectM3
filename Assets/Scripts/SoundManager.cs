@@ -70,4 +70,17 @@ public class SoundManager : MonoBehaviour
         yield return new WaitForSeconds(audioSourceSFX.clip.length);
         audioSourceSFX.volume = originalVolume;
     }
+
+    public void UpdateBGMVolume(float volume)
+    {
+        audioSourceBGM.volume = volume;
+    }
+
+    public void UpdateSFXVolume(float volume)
+    {
+        audioSourceSFX.volume = volume; 
+    }
+
+    public float GetBGMVolume() { return audioSourceBGM.volume; }
+    public float GetSFXVolume() { return audioSourceSFX.volume; }
 }
