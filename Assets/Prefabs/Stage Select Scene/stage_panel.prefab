@@ -389,7 +389,7 @@ MonoBehaviour:
   - {fileID: 2871302863263314747}
   - {fileID: 7813600140868022217}
   - {fileID: 1297175552960831802}
-  StageButton: {fileID: 7105691607089526522}
+  StageButton: {fileID: 6734502347644343855}
 --- !u!1 &5301852509895281648
 GameObject:
   m_ObjectHideFlags: 0
@@ -895,7 +895,7 @@ GameObject:
   - component: {fileID: 3143428896519355928}
   - component: {fileID: 6767118311851597736}
   - component: {fileID: 7827893598304025458}
-  - component: {fileID: 7105691607089526522}
+  - component: {fileID: 6734502347644343855}
   m_Layer: 5
   m_Name: Button (Legacy)
   m_TagString: Untagged
@@ -960,7 +960,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &7105691607089526522
+--- !u!114 &6734502347644343855
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -969,7 +969,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 8204910314728883225}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: 1843dadefb85e8b40afbeab15bc44405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:

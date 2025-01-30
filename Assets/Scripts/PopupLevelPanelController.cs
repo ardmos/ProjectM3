@@ -8,8 +8,8 @@ public class PopupLevelPanelController : MonoBehaviour
 {
     public TextMeshProUGUI TitleTextUI;
     public TextMeshProUGUI TargetScoreTextUI;
-    public Button CloseButton;
-    public Button PlayButton;
+    public CustomClickSoundButton CloseButton;
+    public CustomClickSoundButton PlayButton;
     public GameObject[] StarObjects = new GameObject[3];
 
     private void Start()
@@ -27,10 +27,10 @@ public class PopupLevelPanelController : MonoBehaviour
             StarObjects[i].SetActive(i < starScore);
         }
 
-        CloseButton.onClick.AddListener(() => {
+        CloseButton.AddClickListener(() => {
             Hide();
         });
-        PlayButton.onClick.AddListener(() =>
+        PlayButton.AddClickListener(() =>
         {
             LoadSceneManager.Scene targetScene = (LoadSceneManager.Scene)((int)LoadSceneManager.Scene.Level1 + stageLevel - 1);
             LoadSceneManager.Instance.Load(targetScene);

@@ -12,6 +12,14 @@ public class ScoreManager : MonoBehaviour
     public int StarScore = 0;
     [SerializeField] private int currentScore = 0;
 
+    private void Start()
+    {
+        for (int i = 0; i < StarObjects.Length; i++)
+        {
+            StarObjects[i].SetActive(false);
+        }
+    }
+
     public void AddScore(List<Candy> poppedCandies)
     {
         foreach (Candy poppedCandy in poppedCandies)

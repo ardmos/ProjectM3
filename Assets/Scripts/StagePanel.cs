@@ -10,7 +10,7 @@ public class StagePanel : MonoBehaviour
     public Image StageImageUI;
     public TextMeshProUGUI StageNameTextUI;
     public GameObject[] StarObjects = new GameObject[3];
-    public Button StageButton;
+    public CustomClickSoundButton StageButton;
 
     public void InitPanel(int stageLevel, Sprite stageImage, string stageName, int starScore)
     {
@@ -26,7 +26,7 @@ public class StagePanel : MonoBehaviour
 
         //
         // 레벨 팝업이 열린 다음 씬 이동하도록!
-        StageButton.onClick.AddListener(() => {
+        StageButton.AddClickListener(() => {
             StageSelectSceneManager.Instance.PopupLevelPanelController.Show();
             StageSelectSceneManager.Instance.PopupLevelPanelController.InitPopup(stageLevel, stageName, starScore);
         });

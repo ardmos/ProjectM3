@@ -5,20 +5,10 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private Text targetScoreText;
-    [SerializeField] private Text moveCountText;
-    [SerializeField] private Text currentScoreText;
+    public CustomClickSoundButton BackButton;
 
-    public void SetTargetScore(int score)
+    private void Start()
     {
-        targetScoreText.text = "Target: " + score.ToString();
-    }
-    public void SetMoveCount(int count)
-    {
-        moveCountText.text = "Moves: " + count.ToString();
-    }
-    public void SetCurrentScore(int score)
-    {
-        currentScoreText.text = "Score: " + score.ToString();
+        BackButton.AddClickListener(() => { LoadSceneManager.Instance.Load(LoadSceneManager.Scene.StageSelectScene); });
     }
 }

@@ -9,7 +9,7 @@ public class CustomClickSoundButton : Button
     public void AddClickListener(UnityAction call)
     {
         onClick.AddListener(() => {
-            //SoundManager.Instance.PlayButtonClickSound();
+            SoundManager.Instance.PlaySFX(SoundManager.SFX.Button);
             call();
         });
     }

@@ -29,7 +29,6 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        // 시작하자마자 터지는것들 스코어 포함 안시키려면 여기서 처리해줘야함
         UpdateState(State.Play);
     }
 

@@ -41,8 +41,6 @@ public class GameBoardManager : MonoBehaviour
     public Dictionary<Vector3Int, Queue<Candy>> SpawnerContents = new();
     // 보드의 각 셀 정보를 저장하는 딕셔너리
     public Dictionary<Vector3Int, GameBoardCell> CellContents = new();
-    // 캔디 프리팹들
-    //public Candy[] CandyPrefabs;
 
     public ScoreManager ScoreManager;
 
@@ -52,7 +50,7 @@ public class GameBoardManager : MonoBehaviour
     // 보드의 경계를 나타내는 변수
     private BoundsInt m_BoundsInt;
 
-    // 젬 타입과 실제 Gem 객체를 매핑하는 딕셔너리
+    // 캔디 타입과 실제 캔디 객체를 매핑하는 딕셔너리
     private Dictionary<CandyType, Candy> m_CandyLookup;
 
     public State state = State.Init;
@@ -79,18 +77,6 @@ public class GameBoardManager : MonoBehaviour
     {
         UpdateState(State.Init);
     }
-
-    // 보드 초기화 메서드
-    public void InitializeBoard()
-    {
-        // 보드 경계 설정
-        SetBoardBounds();
-        // 캔디 룩업 테이블 초기화
-        InitializeCandyLookup();
-        // 보드 생성
-        GenerateBoard();
-    }
-
 
     private IEnumerator RunStateMachine()
     {
@@ -144,6 +130,17 @@ public class GameBoardManager : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    // 보드 초기화 메서드
+    public void InitializeBoard()
+    {
+        // 보드 경계 설정
+        SetBoardBounds();
+        // 캔디 룩업 테이블 초기화
+        InitializeCandyLookup();
+        // 보드 생성
+        GenerateBoard();
     }
 
     // 보드 경계 설정

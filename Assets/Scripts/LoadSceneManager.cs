@@ -38,11 +38,16 @@ public class LoadSceneManager : MonoBehaviour
     {
         StartCoroutine(FadeAndLoadScene(targetScene.ToString()));
 
+        PlayBGM(targetScene);
+    }
+
+    private void PlayBGM(Scene targetScene)
+    {
         switch (targetScene)
         {
             case Scene.TitleScene:
                 SoundManager.Instance.PlayBGM(SoundManager.BGM.TitleScene);
-                break; 
+                break;
             case Scene.StageSelectScene:
                 SoundManager.Instance.PlayBGM(SoundManager.BGM.StageSelectScene);
                 break;
@@ -50,7 +55,7 @@ public class LoadSceneManager : MonoBehaviour
                 // ∞‘¿”æ¿
                 SoundManager.Instance.PlayBGM(SoundManager.BGM.GameScene);
                 break;
-        }   
+        }
     }
 
     private IEnumerator FadeAndLoadScene(string sceneName)

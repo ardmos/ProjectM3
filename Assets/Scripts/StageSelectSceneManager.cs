@@ -14,8 +14,8 @@ public class StageSelectSceneManager : MonoBehaviour
     public Sprite[] StageImages = new Sprite[4];
     public GameObject StagePanelPrefab;
     public RectTransform Grid;
-    public Button ExitButton;
-    public Button SettingsButton;
+    public CustomClickSoundButton ExitButton;
+    public CustomClickSoundButton SettingsButton;
     public PopupSettingsPanelController PopupSettingsPanelController;
     public PopupLevelPanelController PopupLevelPanelController;
 
@@ -60,8 +60,8 @@ public class StageSelectSceneManager : MonoBehaviour
 
     private void InitButtons()
     {
-        ExitButton.onClick.AddListener(()=> LoadSceneManager.Instance.Load(LoadSceneManager.Scene.TitleScene));
-        SettingsButton.onClick.AddListener(() => {
+        ExitButton.AddClickListener(()=> LoadSceneManager.Instance.Load(LoadSceneManager.Scene.TitleScene));
+        SettingsButton.AddClickListener(() => {
             // Settings ÆË¾÷ È°¼ºÈ­
             PopupSettingsPanelController.Show();
         });
