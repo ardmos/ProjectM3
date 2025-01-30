@@ -19,7 +19,7 @@ public class CandyPoppedEventManager : MonoBehaviour
     private void HandlePoppedEvent(List<Candy> poppedCandies)
     {
         // 먼저 ScoreManager의 AddScore 실행
-        ScoreManager.AddScore(poppedCandies);
+        ScoreManager.AddScoreByCandy(poppedCandies);
 
         // 그 다음 TargetCountManager의 CheckTargetClear 실행
         TargetCountManager.CheckTargetClear(poppedCandies);

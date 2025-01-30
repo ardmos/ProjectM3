@@ -30,8 +30,7 @@ public class PopupScorePanelController : MonoBehaviour
         ScoreText.text = "0";
 
         CloseButton.AddClickListener(() => { LoadSceneManager.Instance.Load(LoadSceneManager.Scene.StageSelectScene); });
-        RetryButton.AddClickListener(() => { LoadSceneManager.Instance.Load((LoadSceneManager.Scene)SceneManager.GetActiveScene().buildIndex); });
-        NextButton.AddClickListener(() => { LoadSceneManager.Instance.Load((LoadSceneManager.Scene)SceneManager.GetActiveScene().buildIndex + 1); }); // 다음 씬으로 이동
+        RetryButton.AddClickListener(() => { LoadSceneManager.Instance.Load((LoadSceneManager.Scene)SceneManager.GetActiveScene().buildIndex); });       
     }
 
     private void GameState_OnWin()
@@ -49,11 +48,13 @@ public class PopupScorePanelController : MonoBehaviour
             NextButton.gameObject.SetActive(starScore >= 3);
             NextButton.GetComponentInChildren<TextMeshProUGUI>().text = "Next";
             NextButton.GetComponentInChildren<TextMeshProUGUI>().fontSize = 60;
+            NextButton.AddClickListener(() => { LoadSceneManager.Instance.Load((LoadSceneManager.Scene)SceneManager.GetActiveScene().buildIndex + 1); }); // 다음 씬으로 이동
         }
         else
         {
             NextButton.GetComponentInChildren<TextMeshProUGUI>().text = "Coming Soon";
             NextButton.GetComponentInChildren<TextMeshProUGUI>().fontSize = 40;
+            NextButton.AddClickListener(() => { LoadSceneManager.Instance.Load(LoadSceneManager.Scene.StageSelectScene); }); 
         }      
     }
 

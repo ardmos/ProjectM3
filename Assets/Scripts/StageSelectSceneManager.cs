@@ -43,16 +43,21 @@ public class StageSelectSceneManager : MonoBehaviour
             int score = stageScorePair.Value;
 
             StagePanel stagePanel = Instantiate(StagePanelPrefab, Grid).GetComponent<StagePanel>();
-            stagePanel.InitPanel(stage, StageImages[stage % StageImages.Length], $"Level {stage}", score);
+            stagePanel.InitPanel(stage, StageImages[stage % (StageImages.Length -1)], $"Level {stage}", score);
         }
 
         // 새로 열리는 스테이지
         int nextLevel = sortedDict.Keys.LastOrDefault()+1;
+        if(nextLevel >= (int)LoadSceneManager.Scene.Max-1)
+        {
+            return;
+        }
+
         int lastScore = sortedDict.Values.LastOrDefault();
-        if (lastScore >= 2)
+        if (lastScore >= 3)
         {         
             StagePanel stagePanel = Instantiate(StagePanelPrefab, Grid).GetComponent<StagePanel>();
-            stagePanel.InitPanel(nextLevel, StageImages[nextLevel % StageImages.Length], $"Level {nextLevel}", 0);
+            stagePanel.InitPanel(nextLevel, StageImages[nextLevel % (StageImages.Length - 1)], $"Level {nextLevel}", 0);
         }
     }
 

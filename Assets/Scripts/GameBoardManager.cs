@@ -91,6 +91,8 @@ public class GameBoardManager : MonoBehaviour
                 //Debug.Log($"Idle State:{state}");
                 break;
             case State.MatchCheck:
+                // 매칭 전 딜레이
+                yield return new WaitForSeconds(0.5f);
                 CheckMatches();
                 // 매치 캔디들 제거
                 if (matchedCandies.Count > 0)
@@ -126,8 +128,6 @@ public class GameBoardManager : MonoBehaviour
                 SwapCandies(swapSourceIdx, swapTargetIdx);
                 // 스왑 후 무브 카운트 증가
                 OnMoved.Invoke();
-                // 매칭 전 딜레이
-                yield return new WaitForSeconds(0.5f);
                 // 스왑 후 매칭 확인
                 UpdateState(State.MatchCheck);
                 break;
@@ -423,7 +423,7 @@ public class GameBoardManager : MonoBehaviour
             {
                 var emptyCellIndex = new Vector3Int(x, y, 0);
                 // 빈 곳 확인
-                if (CellContents[emptyCellIndex].ContainingCandy == null)
+                if (CellContents.ContainsKey(emptyCellIndex) && CellContents[emptyCellIndex].ContainingCandy == null)
                 {
                     emptyCells.Add(emptyCellIndex);
                 }
@@ -451,7 +451,7 @@ public class GameBoardManager : MonoBehaviour
             {
                 var idx = new Vector3Int(x, y, 0);
 
-                if (CellContents[idx].ContainingCandy == null)
+                if (CellContents.ContainsKey(idx) && CellContents[idx].ContainingCandy == null)
                 {
                     // 빈 셀 발견
                     var candy = FindCandyToFallInColumn(idx);
@@ -479,10 +479,11 @@ public class GameBoardManager : MonoBehaviour
     {
         for (int x = emptyCellIndex.x + 1; x <= m_BoundsInt.xMax; ++x)
         {
-            if (CellContents[new Vector3Int(x, emptyCellIndex.y)].ContainingCandy != null)
+            var idx = new Vector3Int(x, emptyCellIndex.y);
+            if (CellContents.ContainsKey(idx) && CellContents[idx].ContainingCandy != null)
             {
                 // 성공.
-                return (true, new Vector3Int(x, emptyCellIndex.y));
+                return (true, idx);
             }
         }
         // 실패. 
@@ -550,6 +551,8 @@ public class GameBoardManager : MonoBehaviour
     // 4. 스왑
     public void StartSwap(Vector3Int sourceIndex, Vector3Int targetIndex)
     {
+        if (state == State.Swap) return;
+
         swapSourceIdx = sourceIndex;
         swapTargetIdx = targetIndex;
 
@@ -558,6 +561,8 @@ public class GameBoardManager : MonoBehaviour
 
     private void SwapCandies(Vector3Int sourceIndex, Vector3Int targetIndex)
     {
+        if (!CellContents.ContainsKey(sourceIndex) || !CellContents.ContainsKey(targetIndex)) return;
+
         // 캔디 오브젝트 참조 저장
         Candy sourceCandy = CellContents[sourceIndex].ContainingCandy;
         Candy targetCandy = CellContents[targetIndex].ContainingCandy;
@@ -676,29 +681,5 @@ public class GameBoardManager : MonoBehaviour
     {
         state = newState;
         StartCoroutine(RunStateMachine());
-    }
-
-
-    // 디버깅용
-    private void PrintCellData()
-    {
-        Debug.Log($"======================================");
-
-        for (int x = m_BoundsInt.xMax; x >= m_BoundsInt.xMin; --x)
-        {
-            string row = "";
-            for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
-            {
-                var idx = new Vector3Int(x, y, 0);
-
-                if (CellContents[idx].ContainingCandy != null)
-                    row += $", {CellContents[idx].ContainingCandy.CandyType}";
-                else
-                    row += $", -1";
-            }
-            Debug.Log($"{row}");
-        }
-
-        Debug.Log($"======================================");
     }
 }

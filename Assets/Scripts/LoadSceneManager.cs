@@ -15,7 +15,8 @@ public class LoadSceneManager : MonoBehaviour
         Level2,
         Level3,
         Level4,
-        Level5
+        Level5,
+        Max
     }
 
     public Image fadeImage;

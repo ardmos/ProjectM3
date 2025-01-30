@@ -6,30 +6,30 @@ using UnityEngine.UI;
 
 public class MoveCountManager : MonoBehaviour
 {
-    public TextMeshProUGUI moveCountText;
-    public int moveCount;
+    public TextMeshProUGUI MoveCountText;
+    public int MoveCount;
 
     private void Start()
     {
-        UpdateMoveCountTextUI(moveCount);
+        UpdateMoveCountTextUI(MoveCount);
 
         GameBoardManager.Instance.OnMoved += IncreaseMoveCount;
     }
 
     private void IncreaseMoveCount()
     {
-        moveCount++;
-        UpdateMoveCountTextUI(moveCount);
+        MoveCount++;
+        UpdateMoveCountTextUI(MoveCount);
 
-        if (moveCount >= LevelData.Instance.MoveMaxCount)
+        if (MoveCount >= LevelData.Instance.MoveMaxCount)
         {
             StartCoroutine(StageLose());
         }
     }
 
-    private void UpdateMoveCountTextUI(int moveCount)
+    public void UpdateMoveCountTextUI(int moveCount)
     {
-        moveCountText.text = $"{moveCount}/{LevelData.Instance.MoveMaxCount}";
+        MoveCountText.text = $"{moveCount}/{LevelData.Instance.MoveMaxCount}";
     }
 
     private IEnumerator StageLose()

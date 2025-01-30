@@ -20,7 +20,13 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
-    public void AddScore(List<Candy> poppedCandies)
+    public void AddScore(int value)
+    {
+        currentScore += value;
+        CheckStarScore();
+    }
+
+    public void AddScoreByCandy(List<Candy> poppedCandies)
     {
         foreach (Candy poppedCandy in poppedCandies)
         {
