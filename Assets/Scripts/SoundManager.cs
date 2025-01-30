@@ -83,7 +83,7 @@ public class SoundManager : MonoBehaviour
     private IEnumerator GenerateCandySFXVolumeControl()
     {
         float originalVolume = audioSourceSFX.volume;
-        audioSourceSFX.volume *= 0.7f;
+        audioSourceSFX.volume *= 0.5f;
         audioSourceSFX.Play();
         yield return new WaitForSeconds(audioSourceSFX.clip.length);
         audioSourceSFX.volume = originalVolume;
