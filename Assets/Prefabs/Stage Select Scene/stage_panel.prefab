@@ -390,6 +390,10 @@ MonoBehaviour:
   - {fileID: 7813600140868022217}
   - {fileID: 1297175552960831802}
   StageButton: {fileID: 6734502347644343855}
+  BGSprites:
+  - {fileID: 21300000, guid: d452e7d4f69e4f54889491bd131324ec, type: 3}
+  - {fileID: 21300000, guid: c9b15b216b682e145b88691fbed233c4, type: 3}
+  BGImageUI: {fileID: 2834110143707804640}
 --- !u!1 &5301852509895281648
 GameObject:
   m_ObjectHideFlags: 0
