@@ -23,12 +23,19 @@ public class MoveCountManager : MonoBehaviour
 
         if (moveCount >= LevelData.Instance.MoveMaxCount)
         {
-            GameManager.Instance.UpdateState(GameManager.State.Lose);
+            StartCoroutine(StageLose());
         }
     }
 
     private void UpdateMoveCountTextUI(int moveCount)
     {
         moveCountText.text = $"{moveCount}/{LevelData.Instance.MoveMaxCount}";
+    }
+
+    private IEnumerator StageLose()
+    {
+        yield return new WaitForSeconds(1f);
+        // 스테이지 실패!
+        GameManager.Instance.UpdateState(GameManager.State.Lose);
     }
 }

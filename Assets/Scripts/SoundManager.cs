@@ -55,6 +55,19 @@ public class SoundManager : MonoBehaviour
     {
         audioSourceSFX.Stop();
         audioSourceSFX.clip = SFXClips[(int)sfxName];
+
+        if(sfxName == SFX.GenerateCandy)
+            StartCoroutine(GenerateCandySFXVolumeControl());
+        else
+            audioSourceSFX.Play();
+    }
+
+    private IEnumerator GenerateCandySFXVolumeControl()
+    {
+        float originalVolume = audioSourceSFX.volume;
+        audioSourceSFX.volume *= 0.7f;
         audioSourceSFX.Play();
+        yield return new WaitForSeconds(audioSourceSFX.clip.length);
+        audioSourceSFX.volume = originalVolume;
     }
 }

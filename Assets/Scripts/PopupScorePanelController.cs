@@ -21,13 +21,13 @@ public class PopupScorePanelController : MonoBehaviour
         GameManager.Instance.OnWin += GameState_OnWin;
         
         InitPopup();
+        Hide();
     }
 
     private void InitPopup()
     {
         TitleText.text = $"Level{LevelData.Instance.Level}";
         ScoreText.text = "0";
-        gameObject.SetActive(false);
 
         CloseButton.AddClickListener(() => { LoadSceneManager.Instance.Load(LoadSceneManager.Scene.StageSelectScene); });
         RetryButton.AddClickListener(() => { LoadSceneManager.Instance.Load((LoadSceneManager.Scene)SceneManager.GetActiveScene().buildIndex); });

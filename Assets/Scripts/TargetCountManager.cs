@@ -50,8 +50,14 @@ public class TargetCountManager : MonoBehaviour
 
         if (allTargetsClear)
         {
-            // 스테이지 클리어!
-            GameManager.Instance.UpdateState(GameManager.State.Win);
+            StartCoroutine(StageClear());
         }
+    }
+
+    private IEnumerator StageClear()
+    {
+        yield return new WaitForSeconds(1f);
+        // 스테이지 클리어!
+        GameManager.Instance.UpdateState(GameManager.State.Win);
     }
 }
