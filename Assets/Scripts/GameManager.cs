@@ -15,6 +15,8 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance;
 
+    public ScoreManager ScoreManager;
+
     public event Action OnReady;
     public event Action OnPlay;
     public event Action OnWin;
@@ -52,6 +54,8 @@ public class GameManager : MonoBehaviour
             case State.Win:
                 // 효과음 재생
                 SoundManager.Instance.PlaySFX(SoundManager.SFX.Win);
+                // 게임 결과 세이브
+                PlayerDataManager.Instance.UpdatePlayerStageClearData(LevelData.Instance.Level,ScoreManager.StarScore);
                 OnWin.Invoke();
                 break;
             case State.Lose:

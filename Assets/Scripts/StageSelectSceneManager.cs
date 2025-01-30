@@ -35,8 +35,6 @@ public class StageSelectSceneManager : MonoBehaviour
     {
         var PlayerData = PlayerDataManager.Instance.PlayerData;
         var sortedDict = PlayerData.StageScorePairs.OrderBy(x => x.Key).ToDictionary(x => x.Key, x => x.Value);
-        
-
 
         // 깨본적 있는 스테이지들
         foreach (var stageScorePair in PlayerData.StageScorePairs)
@@ -45,7 +43,7 @@ public class StageSelectSceneManager : MonoBehaviour
             int score = stageScorePair.Value;
 
             StagePanel stagePanel = Instantiate(StagePanelPrefab, Grid).GetComponent<StagePanel>();
-            stagePanel.InitPanel(stage, StageImages[stage-1], $"Level {stage}", score);
+            stagePanel.InitPanel(stage, StageImages[stage % StageImages.Length], $"Level {stage}", score);
         }
 
         // 새로 열리는 스테이지
@@ -54,7 +52,7 @@ public class StageSelectSceneManager : MonoBehaviour
         if (lastScore >= 2)
         {         
             StagePanel stagePanel = Instantiate(StagePanelPrefab, Grid).GetComponent<StagePanel>();
-            stagePanel.InitPanel(nextLevel, StageImages[nextLevel%StageImages.Length], $"Level {nextLevel}", 0);
+            stagePanel.InitPanel(nextLevel, StageImages[nextLevel % StageImages.Length], $"Level {nextLevel}", 0);
         }
     }
 
