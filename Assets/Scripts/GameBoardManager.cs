@@ -68,6 +68,8 @@ public class GameBoardManager : MonoBehaviour
     public event Action OnMoved;
     public event Action<List<Candy>> OnPopped;
 
+    public GameObject TilemapLogicObject;
+
     private void Awake()
     {
         Instance = this;
@@ -147,6 +149,8 @@ public class GameBoardManager : MonoBehaviour
         InitializeCandyLookup();
         // 보드 생성
         GenerateBoard();
+        // 만약을 대비해 Logic 비활성화
+        TilemapLogicObject.SetActive(false);
         // 효과음 재생
         SoundManager.Instance.PlaySFX(SoundManager.SFX.GenerateCandy);
     }

@@ -24,11 +24,14 @@ public class CandySpawnerTile : TileBase
         GameBoardManager.RegisterSpawner(position);
 
         // Remove the tile from the Tilemap after registering it
-/*        Tilemap map = tilemap.GetComponent<Tilemap>();
-        if (map != null)
-        {
-            map.SetTile(position, null); // Remove the tile at this position
-        }*/
+        /*        Tilemap map = tilemap.GetComponent<Tilemap>();
+                if (map != null)
+                {
+                    map.SetTile(position, null); // Remove the tile at this position
+                }*/
+
+        Debug.Log($"tilemap:{tilemap}, go:{go}");
+
 
         return base.StartUp(position, tilemap, go);
     }

@@ -5638,6 +5638,7 @@ MonoBehaviour:
   SpawnerPosition: []
   ScoreManager: {fileID: 1933397779}
   state: 0
+  TilemapLogicObject: {fileID: 1087246972}
 --- !u!4 &1204279939
 Transform:
   m_ObjectHideFlags: 0
