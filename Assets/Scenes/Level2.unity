@@ -4892,7 +4892,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1062312851
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5815,9 +5815,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e33db71e9b85b94dbadd14d5a8adc37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  SpawnerPosition: []
-  ScoreManager: {fileID: 1933397779}
   state: 0
+  SpawnerPosition: []
   TilemapLogicObject: {fileID: 1087246972}
 --- !u!4 &1204279939
 Transform:

@@ -1,8 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+/// <summary>
+/// 디자인 레벨에서만 사용되는 타일입니다. 
+/// 런타임에 GameBoardManager에게 이 타일이 캔디 스포너를 배치하는 장소라는걸 알립니다.
+/// </summary>
 [CreateAssetMenu(fileName = "CandySpawnerPlacerTile", menuName = "2D Match/Tile/Candy Spawner Placer")]
 public class CandySpawnerTile : TileBase
 {
@@ -22,16 +24,6 @@ public class CandySpawnerTile : TileBase
 
         // Register the spawner position
         GameBoardManager.RegisterSpawner(position);
-
-        // Remove the tile from the Tilemap after registering it
-        /*        Tilemap map = tilemap.GetComponent<Tilemap>();
-                if (map != null)
-                {
-                    map.SetTile(position, null); // Remove the tile at this position
-                }*/
-
-        Debug.Log($"tilemap:{tilemap}, go:{go}");
-
 
         return base.StartUp(position, tilemap, go);
     }

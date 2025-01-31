@@ -2096,6 +2096,53 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1846347689}
   m_CullTransparentMesh: 1
+--- !u!1 &1847789650
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1847789652}
+  - component: {fileID: 1847789651}
+  m_Layer: 0
+  m_Name: BannerAdManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1847789651
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847789650}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65719836421bd3945bf9be0814635e13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _bannerPosition: 1
+  _androidAdUnitId: Banner_Android
+  _iOSAdUnitId: Banner_iOS
+--- !u!4 &1847789652
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1847789650}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 720, y: 1520, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1911799265
 GameObject:
   m_ObjectHideFlags: 0
@@ -2112,7 +2159,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1911799266
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2125,9 +2172,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b01c142fa90fd549969e8bb497e8208, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _androidGameId: 
-  _iOSGameId: 
-  _testMode: 1
+  _androidGameId: 5786269
+  _iOSGameId: 5786268
+  _testMode: 0
 --- !u!4 &1911799267
 Transform:
   m_ObjectHideFlags: 0
@@ -2433,3 +2480,4 @@ SceneRoots:
   - {fileID: 730922852}
   - {fileID: 1791931258}
   - {fileID: 1911799267}
+  - {fileID: 1847789652}

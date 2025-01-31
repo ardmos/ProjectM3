@@ -2,24 +2,20 @@ using DG.Tweening;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
-using UnityEngine.Tilemaps;
-using UnityEngine.VFX;
 using Random = UnityEngine.Random;
-using UnityEngine.XR;
 
-
+/// <summary>
+/// 게임보드에서 일어나는 모든 일을 관리하는 게임보드 매니저입니다.
+/// </summary>
 [DefaultExecutionOrder(-9999)]
 public class GameBoardManager : MonoBehaviour
 {
+    public static GameBoardManager Instance;
+
+    public const int MIN_MATCH = 3; // 최소 매치 개수
+
     public enum State
     {
         Init,
@@ -31,29 +27,23 @@ public class GameBoardManager : MonoBehaviour
         Fall,
         Swap
     }
-
-    // 싱글톤 인스턴스
-    public static GameBoardManager Instance;
-
-    public const int MIN_MATCH = 3; // 최소 매치 개수
+    public State state = State.Init;
 
     public List<Vector3Int> SpawnerPosition = new();
+    // 캔디 스포너들의 위치와 보유중인 캔디목록을 담고있는 딕셔너리
     public Dictionary<Vector3Int, Queue<Candy>> SpawnerContents = new();
-    // 보드의 각 셀 정보를 저장하는 딕셔너리
+    // 각 셀들의 위치와 정보를 저장하는 딕셔너리
     public Dictionary<Vector3Int, GameBoardCell> CellContents = new();
-
-    public ScoreManager ScoreManager;
-
-    public Grid Grid => m_Grid; // Tilemap의 부모 그리드
-    private Grid m_Grid;
-    public BoundsInt Bounds => m_BoundsInt;
-    // 보드의 경계를 나타내는 변수
-    private BoundsInt m_BoundsInt;
-
     // 캔디 타입과 실제 캔디 객체를 매핑하는 딕셔너리
     private Dictionary<CandyType, Candy> m_CandyLookup;
 
-    public State state = State.Init;
+    // 모든 Tilemap의 부모 그리드
+    public Grid Grid => m_Grid; 
+    private Grid m_Grid;
+
+    // 보드의 경계를 나타내는 변수
+    public BoundsInt Bounds => m_BoundsInt;
+    private BoundsInt m_BoundsInt;
 
     // 스왑 관련 변수
     private Vector3Int swapSourceIdx = new();
@@ -67,7 +57,6 @@ public class GameBoardManager : MonoBehaviour
 
     public event Action OnMoved;
     public event Action<List<Candy>> OnPopped;
-
     public GameObject TilemapLogicObject;
 
     private void Awake()
@@ -80,6 +69,9 @@ public class GameBoardManager : MonoBehaviour
         UpdateState(State.Init);
     }
 
+    /// <summary>
+    /// 게임보드매니저 state에 따라 모든 절차를 관리하는 메서드입니다.
+    /// </summary>
     private IEnumerator RunStateMachine()
     {
         if (GameManager.Instance.GetGameState() != GameManager.State.Play) yield break;
@@ -91,8 +83,7 @@ public class GameBoardManager : MonoBehaviour
                 UpdateState(State.Idle);
                 break;
             case State.Idle:
-                // 기본 상태
-                //Debug.Log($"Idle State:{state}");
+                // 기본 대기 상태
                 break;
             case State.MatchCheck:
                 // 매칭 전 딜레이
@@ -125,10 +116,8 @@ public class GameBoardManager : MonoBehaviour
                 UpdateState(State.MatchCheck);
                 break;
             case State.Swap:
-                // 스왑 가능여부 체크 로직이 필요함
                 // 스왑 효과음 재생
                 SoundManager.Instance.PlaySFX(SoundManager.SFX.Swap);
-
                 SwapCandies(swapSourceIdx, swapTargetIdx);
                 // 스왑 후 무브 카운트 증가
                 OnMoved.Invoke();
@@ -149,7 +138,7 @@ public class GameBoardManager : MonoBehaviour
         InitializeCandyLookup();
         // 보드 생성
         GenerateBoard();
-        // 만약을 대비해 Logic 비활성화
+        // 모종의 이유로 타일맵 렌더링이 계속될 경우를 대비해 Logic 비활성화
         TilemapLogicObject.SetActive(false);
         // 효과음 재생
         SoundManager.Instance.PlaySFX(SoundManager.SFX.GenerateCandy);
@@ -194,11 +183,10 @@ public class GameBoardManager : MonoBehaviour
         }
     }
 
-    // 0. 생성
-    // 최초 보드 생성 메서드. 겹치는 캔디가 없도록 합니다
+    // 최초 보드 캔디 생성 메서드. 겹치는 캔디가 없도록 생성해줍니다.
     private void GenerateBoard()
     {
-        // 보드의 각 셀을 순회하며 젬 생성
+        // 보드의 각 셀을 순회하며 캔디 생성
         for (int y = m_BoundsInt.yMin; y <= m_BoundsInt.yMax; ++y)
         {
             for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
@@ -215,7 +203,7 @@ public class GameBoardManager : MonoBehaviour
                 int rightCandyType = -1;
                 int topCandyType = -1;
 
-                //check if there is two gem of the same type of the left
+                //check if there is two candy of the same type of the left
                 if (CellContents.TryGetValue(idx + new Vector3Int(-1, 0, 0), out var leftContent) &&
                     leftContent.ContainingCandy != null)
                 {
@@ -224,12 +212,12 @@ public class GameBoardManager : MonoBehaviour
                     if (CellContents.TryGetValue(idx + new Vector3Int(-2, 0, 0), out var leftLeftContent) &&
                         leftLeftContent.ContainingCandy != null && leftCandyType == (int)leftLeftContent.ContainingCandy.CandyType)
                     {
-                        //we have two gem of a given type on the left, so we can't ue that type anymore
+                        //we have two candy of a given type on the left, so we can't ue that type anymore
                         availableCandies.Remove((CandyType)leftCandyType);
                     }
                 }
 
-                //check if there is two gem of the same type below
+                //check if there is two candy of the same type below
                 if (CellContents.TryGetValue(idx + new Vector3Int(0, -1, 0), out var bottomContent) &&
                     bottomContent.ContainingCandy != null)
                 {
@@ -238,25 +226,25 @@ public class GameBoardManager : MonoBehaviour
                     if (CellContents.TryGetValue(idx + new Vector3Int(0, -2, 0), out var bottomBottomContent) &&
                         bottomBottomContent.ContainingCandy != null && bottomCandyType == (int)bottomBottomContent.ContainingCandy.CandyType)
                     {
-                        //we have two gem of a given type on the bottom, so we can't ue that type anymore
+                        //we have two candy of a given type on the bottom, so we can't ue that type anymore
                         availableCandies.Remove((CandyType)bottomCandyType);
                     }
 
                     if (leftCandyType != -1 && leftCandyType == bottomCandyType)
                     {
-                        //if the left and bottom gem are the same type, we need to check if the bottom left gem is ALSO
+                        //if the left and bottom candy are the same type, we need to check if the bottom left candy is ALSO
                         //of the same type, as placing that type here would create a square, which is a valid match
                         if (CellContents.TryGetValue(idx + new Vector3Int(-1, -1, 0), out var bottomLeftContent) &&
                             bottomLeftContent.ContainingCandy != null && bottomCandyType == leftCandyType)
                         {
-                            //we already have a corner of gem on left, bottom left and bottom position, so remove that type
+                            //we already have a corner of candy on left, bottom left and bottom position, so remove that type
                             availableCandies.Remove((CandyType)leftCandyType);
                         }
                     }
                 }
 
                 //as we fill left to right and bottom to top, we could only test left and bottom, but as we can have
-                //manually placed gems, we still need to test in the other 2 direction to make sure
+                //manually placed candies, we still need to test in the other 2 direction to make sure
 
                 //check right
                 if (CellContents.TryGetValue(idx + new Vector3Int(1, 0, 0), out var rightContent) &&
@@ -273,11 +261,11 @@ public class GameBoardManager : MonoBehaviour
                     if (CellContents.TryGetValue(idx + new Vector3Int(2, 0, 0), out var rightRightContent) &&
                         rightRightContent.ContainingCandy != null && rightCandyType == (int)rightRightContent.ContainingCandy.CandyType)
                     {
-                        //we have two gem of a given type on the right, so we can't ue that type anymore
+                        //we have two candy of a given type on the right, so we can't ue that type anymore
                         availableCandies.Remove((CandyType)rightCandyType);
                     }
 
-                    //right and bottom gem are the same, check the bottom right to avoid creating a square
+                    //right and bottom candy are the same, check the bottom right to avoid creating a square
                     if (rightCandyType != -1 && rightCandyType == bottomCandyType)
                     {
                         if (CellContents.TryGetValue(idx + new Vector3Int(1, -1, 0), out var bottomRightContent) &&
@@ -303,11 +291,11 @@ public class GameBoardManager : MonoBehaviour
                     if (CellContents.TryGetValue(idx + new Vector3Int(0, 1, 0), out var topTopContent) &&
                         topTopContent.ContainingCandy != null && topCandyType == (int)topTopContent.ContainingCandy.CandyType)
                     {
-                        //we have two gem of a given type on the top, so we can't ue that type anymore
+                        //we have two candy of a given type on the top, so we can't ue that type anymore
                         availableCandies.Remove((CandyType)topCandyType);
                     }
 
-                    //right and top gem are the same, check the top right to avoid creating a square
+                    //right and top candy are the same, check the top right to avoid creating a square
                     if (topCandyType != -1 && topCandyType == rightCandyType)
                     {
                         if (CellContents.TryGetValue(idx + new Vector3Int(1, 1, 0), out var topRightContent) &&
@@ -317,7 +305,7 @@ public class GameBoardManager : MonoBehaviour
                         }
                     }
 
-                    //left and top gem are the same, check the top left to avoid creating a square
+                    //left and top candy are the same, check the top left to avoid creating a square
                     if (topCandyType != -1 && topCandyType == leftCandyType)
                     {
                         if (CellContents.TryGetValue(idx + new Vector3Int(-1, 1, 0), out var topLeftContent) &&
@@ -328,16 +316,15 @@ public class GameBoardManager : MonoBehaviour
                     }
                 }
 
-
-                var chosenGem = availableCandies[Random.Range(0, availableCandies.Count)];
-                NewCandyAt(idx, m_CandyLookup[chosenGem]);
+                var chosenCandy = availableCandies[Random.Range(0, availableCandies.Count)];
+                NewCandyAt(idx, m_CandyLookup[chosenCandy]);
             }
         }
     }
 
-    // 1. 매치
+
     /// <summary>
-    /// 1. 매치 확인 & 제거
+    /// 캔디 매치 상태를 확인해주는 메서드입니다
     /// </summary>
     private void CheckMatches()
     {
@@ -350,8 +337,6 @@ public class GameBoardManager : MonoBehaviour
                 Vector3Int idx2 = new Vector3Int(x + 1, y, 0);
                 Vector3Int idx3 = new Vector3Int(x + 2, y, 0);
 
-                //Debug.Log($"{Grid.GetCellCenterWorld(idx)}의 캔디를 기준으로 수평 확인");
-
                 if (!CellContents.TryGetValue(idx, out var current) || current.ContainingCandy == null)
                     continue;
                 if (!CellContents.TryGetValue(idx2, out var current2) || current2.ContainingCandy == null)
@@ -363,7 +348,6 @@ public class GameBoardManager : MonoBehaviour
                 Candy candy2 = CellContents[idx2].ContainingCandy;
                 Candy candy3 = CellContents[idx3].ContainingCandy;
 
-                //Debug.Log($"candy1({Grid.GetCellCenterWorld(idx)}):{candy1}, candy2({Grid.GetCellCenterWorld(idx2)}):{candy2}, candy3({Grid.GetCellCenterWorld(idx3)}):{candy3}");
                 if (candy1.CandyType == candy2.CandyType && candy2.CandyType == candy3.CandyType)
                 {
                     matchedCandies.AddRange(new[] { candy1, candy2, candy3 });
@@ -380,8 +364,6 @@ public class GameBoardManager : MonoBehaviour
                 Vector3Int idx2 = new Vector3Int(x, y + 1, 0);
                 Vector3Int idx3 = new Vector3Int(x, y + 2, 0);
 
-                //Debug.Log($"{Grid.GetCellCenterWorld(idx)}의 캔디를 기준으로 수직 확인");
-
                 if (!CellContents.TryGetValue(idx, out var current) || current.ContainingCandy == null)
                     continue;
                 if (!CellContents.TryGetValue(idx2, out var current2) || current2.ContainingCandy == null)
@@ -393,8 +375,6 @@ public class GameBoardManager : MonoBehaviour
                 Candy candy2 = CellContents[idx2].ContainingCandy;
                 Candy candy3 = CellContents[idx3].ContainingCandy;
 
-                //Debug.Log($"candy1({Grid.GetCellCenterWorld(idx)}):{candy1}, candy2({Grid.GetCellCenterWorld(idx2)}):{candy2}, candy3({Grid.GetCellCenterWorld(idx3)}):{candy3}");
-
                 if (candy1.CandyType == candy2.CandyType && candy2.CandyType == candy3.CandyType)
                 {
                     matchedCandies.AddRange(new[] { candy1, candy2, candy3 });
@@ -404,12 +384,12 @@ public class GameBoardManager : MonoBehaviour
 
         matchedCandies.Distinct().ToList();
     }
+
     /// <summary>
     /// 매치 캔디들 제거
     /// </summary>
     private void PopMatches()
     {
-        //Debug.Log($"사탕 Pop!");
         foreach (Candy candy in matchedCandies)
         {
             CellContents[candy.CurrentIndex].ContainingCandy = null;
@@ -420,6 +400,9 @@ public class GameBoardManager : MonoBehaviour
         matchedCandies.Clear();
     }
 
+    /// <summary>
+    /// 빈칸 확인
+    /// </summary>
     private void EmptyCheck()
     {
         // 캔디 낙하 로직
@@ -437,18 +420,24 @@ public class GameBoardManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 각 빈 셀에게서 가장 근접한 캔디생성기에게 캔디 생성 요청을 합니다
+    /// </summary>
     private void Spawn()
     {
         foreach (Vector3Int emptyCell in emptyCells)
         {
             // emptyCell의 가장 가까운 상단 SpawnerPostition 검색
             Vector3Int closestSpawner = GetClosestSpawner(emptyCell);
-            // 새로운 캔디 스폰 지시
+            // 새로운 캔디 스폰 요청
             ActivateSpawnerAt(closestSpawner);
         }
         emptyCells.Clear();
     }
 
+    /// <summary>
+    /// 빈 셀을 발견하면 보다 높은 위치에 있는 캔디들을 빈 셀로 낙하시켜주는 메서드입니다
+    /// </summary>
     private void Fall()
     {
         for (int x = m_BoundsInt.xMin; x <= m_BoundsInt.xMax; ++x)
@@ -461,7 +450,7 @@ public class GameBoardManager : MonoBehaviour
                 {
                     // 빈 셀 발견
                     var candy = FindCandyToFallInColumn(idx);
-                    //Debug.Log($"candy.success:{candy.success}, candy Pos:{Grid.GetCellCenterWorld(candy.idx)}");
+
                     if (candy.success)
                     {
                         // 캔디 낙하 시작
@@ -496,7 +485,9 @@ public class GameBoardManager : MonoBehaviour
         return (false, Vector3Int.zero);
     }
 
-    // 3. Candy 낙하
+    /// <summary>
+    /// 발견한 캔디를 비어있는 셀로 낙하시켜주는 메서드입니다.
+    /// </summary>
     private void MakeCandyFall(Vector3Int emptyCellIndex, Vector3Int candyCellIndex)
     {
         Candy movingCandy = CellContents[candyCellIndex].ContainingCandy;
@@ -512,6 +503,9 @@ public class GameBoardManager : MonoBehaviour
         movingCandy.UpdateIndex(emptyCellIndex);
     }
 
+    /// <summary>
+    /// 캔디 생성기에 있는 캔디를 비어있는 셀로 낙하시켜주는 메서드입니다.
+    /// </summary>
     private void MakeSpawnedCandyFall(Vector3Int emptyCellIndex)
     {
         // emptyCell의 가장 가까운 상단 SpawnerPostition 검색
@@ -530,15 +524,16 @@ public class GameBoardManager : MonoBehaviour
         newCandy.UpdateIndex(emptyCellIndex);
     }
 
+    /// <summary>
+    /// 해당 위치에서 가장 근접한 캔디 생성기를 찾아주는 메서드입니다.
+    /// </summary>
     private Vector3Int GetClosestSpawner(Vector3Int idx)
     {
         Vector3Int closestSpawner = Vector3Int.zero;
         foreach (Vector3Int spawnerPosition in SpawnerPosition)
         {
-            // y좌표로 먼저 거르고
             if (idx.y == spawnerPosition.y)
             {
-                // 가장 x가 가까운 곳 선택
                 if (closestSpawner.Equals(Vector3Int.zero))
                 {
                     closestSpawner = spawnerPosition;
@@ -554,7 +549,9 @@ public class GameBoardManager : MonoBehaviour
         return closestSpawner;
     }
 
-    // 4. 스왑
+    /// <summary>
+    /// CandyDragHandler를 통해 호출된 캔디 스왑작업을 시작해주는 메서드입니다.
+    /// </summary>
     public void StartSwap(Vector3Int sourceIndex, Vector3Int targetIndex)
     {
         if (state == State.Swap) return;
@@ -565,6 +562,9 @@ public class GameBoardManager : MonoBehaviour
         UpdateState(State.Swap);
     }
 
+    /// <summary>
+    /// 캔디들을 스왑하는 메서드입니다.
+    /// </summary>
     private void SwapCandies(Vector3Int sourceIndex, Vector3Int targetIndex)
     {
         if (!CellContents.ContainsKey(sourceIndex) || !CellContents.ContainsKey(targetIndex)) return;
@@ -598,12 +598,9 @@ public class GameBoardManager : MonoBehaviour
         CellContents[targetIndex].ContainingCandy = sourceCandy;
     }
 
-
     /// <summary>
     ///  Candy Placer Tile로부터 배치 셀을 생성하도록 호출되는 메서드입니다.
     /// </summary>
-    /// <param name="cellPosition"></param>
-    /// <param name="startingCandy"></param>
     public static void RegisterCell(Vector3Int cellPosition, Candy startingCandy = null)
     {
         if (Instance == null)
@@ -621,7 +618,6 @@ public class GameBoardManager : MonoBehaviour
 
     }
 
-    // 그리드 참조
     private void GetReference()
     {
         m_Grid = GameObject.Find("Grid").GetComponent<Grid>();
@@ -631,9 +627,6 @@ public class GameBoardManager : MonoBehaviour
     /// 새로운 캔디를 배치하는 메서드 입니다.
     /// candyPrefab이 null이면 랜덤 캔디를 배치합니다.
     /// </summary>
-    /// <param name="cell"></param>
-    /// <param name="candyPrefab"></param>
-    /// <returns></returns>
     private Candy NewCandyAt(Vector3Int cell, Candy candyPrefab)
     {
         if (candyPrefab == null)
@@ -654,9 +647,8 @@ public class GameBoardManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 캔디 생성 위치 타일로 캔디 생성 셀을 설정하는 메서드입니다. 
+    /// Candy Spawner Tile로부터 캔디 생성기의 위치를 설정하도록 호출되는 메서드입니다. 
     /// </summary>
-    /// <param name="cell"></param>
     public static void RegisterSpawner(Vector3Int cell)
     {
         if (Instance == null)
@@ -668,10 +660,11 @@ public class GameBoardManager : MonoBehaviour
         Instance.SpawnerPosition.Add(cell);
     }
 
-    // 캔디 생성 셀에서 캔디를 생성합니다
+    /// <summary>
+    ///  캔디 생성기에서 캔디를 생성합니다
+    /// </summary>
     private void ActivateSpawnerAt(Vector3Int closestSpawner)
     {
-        //Debug.Log($"closestSpawner:{closestSpawner}, worldPos:{m_Grid.GetCellCenterWorld(closestSpawner)}");
         var candy = Instantiate(LevelData.Instance.CandyPrefabs[Random.Range(0, LevelData.Instance.CandyPrefabs.Length)], m_Grid.GetCellCenterWorld(closestSpawner), Quaternion.identity);
         candy.Init(closestSpawner);
 

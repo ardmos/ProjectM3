@@ -1,11 +1,10 @@
-using DG.Tweening;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
+/// <summary>
+/// 게임씬에서 게임 클리어시 노출되는 팝업입니다.
+/// </summary>
 public class PopupScorePanelController : MonoBehaviour
 {
     public TextMeshProUGUI TitleText;

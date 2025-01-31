@@ -1,9 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
+/// <summary>
+/// 스테이지 선택 씬에서 각 스테이지를 선택하면 상세 정보를 보여주는 팝업입니다.
+/// </summary>
 public class PopupLevelPanelController : MonoBehaviour
 {
     public TextMeshProUGUI TitleTextUI;

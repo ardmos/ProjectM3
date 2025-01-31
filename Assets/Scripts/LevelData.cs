@@ -1,7 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 모든 스테이지 씬에 존재하는 클래스입니다. 
+/// 해당 씬의 규칙과 정보를 저장하는데 쓰입니다.
+/// </summary>
 public class LevelData : MonoBehaviour
 {
     public static LevelData Instance;

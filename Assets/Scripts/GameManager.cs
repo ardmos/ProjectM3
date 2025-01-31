@@ -1,10 +1,13 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 게임 흐름을 관리하는 클래스입니다
+/// </summary>
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
+
     public enum State
     {
         Ready,
@@ -12,8 +15,6 @@ public class GameManager : MonoBehaviour
         Win,
         Lose
     }
-
-    public static GameManager Instance;
 
     public MoveCountManager MoveCountManager;
     public ScoreManager ScoreManager;
@@ -40,6 +41,9 @@ public class GameManager : MonoBehaviour
 
     public State GetGameState() => state;
 
+    /// <summary>
+    /// State를 통해 게임의 흐름을 관리해주는 메서드입니다
+    /// </summary>
     private void RunStateMachine()
     {
         switch (state)
@@ -55,13 +59,12 @@ public class GameManager : MonoBehaviour
                 ChageLeftMovesToScore();
                 // 게임 결과 세이브
                 PlayerDataManager.Instance.UpdatePlayerStageClearData(LevelData.Instance.Level,ScoreManager.StarScore);
-
                 OnWin.Invoke();
                 break;
             case State.Lose:
                 // 효과음 재생
                 SoundManager.Instance.PlaySFX(SoundManager.SFX.Lose);
-                OnLose.Invoke(); // Lose시 동작 아직 미구현
+                OnLose.Invoke();
                 break;
             default:
                 Debug.LogError($"유효한 게임 스테이트가 아닙니다.");
@@ -69,6 +72,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 게임 클리어시 남은 무브 숫자들을 점수로 치환해주는 메서드입니다.
+    /// </summary>
     private void ChageLeftMovesToScore()
     {
         int moveCount = MoveCountManager.MoveCount;

@@ -1,14 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
+/// <summary>
+/// 타이틀씬을 관리하는 매니저입니다.
+/// 씬의 유일한 UI의 기능을 관리합니다.
+/// </summary>
 public class TitleSceneManager : MonoBehaviour
 {
     public CustomClickSoundButton StartButton;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         StartButton.AddClickListener(()=>LoadSceneManager.Instance.Load(LoadSceneManager.Scene.StageSelectScene));
     }

@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
+/// <summary>
+/// 캔디 드래그 결과 처리 로직을 관리하는 클래스입니다.
+/// </summary>
 public class CandyDragHandler : MonoBehaviour
 {
     public static CandyDragHandler Instance;
 
     private GameBoardManager gameBoardManager;
-
     private Dictionary<Vector3Int, GameBoardCell> gameBoardCells;
     private Vector3 dragStartPosition;
     private Candy draggedCandy;
@@ -31,24 +32,19 @@ public class CandyDragHandler : MonoBehaviour
 
         dragStartPosition = touchPos;
         draggedCandy = candy;
-
-        //Debug.Log($"dragStartPosition:{dragStartPosition}, draggedCandy:{draggedCandy}");
     }
 
     public void OnEndDrag(Vector3 touchPos, Candy candy)
     {
-        //Debug.Log($"(isSwapping || draggedCandy == null):{(isSwapping || draggedCandy == null)}");
         if (isSwapping || draggedCandy == null) return;
 
         Vector2 dragVector = touchPos - dragStartPosition;
-        //Debug.Log($"dragVector:{dragVector}, dragThreshold:{dragThreshold}, (dragVector.magnitude < dragThreshold):{(dragVector.magnitude < dragThreshold)}");
+        
         if (dragVector.magnitude < dragThreshold) return;
 
         Vector3Int dragDirection = GetDragDirection(dragVector);
-        Vector3Int currentIndex = draggedCandy.CurrentIndex; //GetCandyGridPosition(draggedCandy);
+        Vector3Int currentIndex = draggedCandy.CurrentIndex;
         Vector3Int targetIndex = currentIndex + dragDirection;
-
-        //Debug.Log($"currentIndex:{currentIndex}, targetIndex:{targetIndex}, IsValidGridPosition(targetIndex):{IsValidGridPosition(targetIndex)}");
 
         if (IsValidGridPosition(targetIndex))
         {
@@ -56,6 +52,9 @@ public class CandyDragHandler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 위치를 변경할 목표지점을 찾기위한 메서드입니다. 플레이어의 드래그 방향을 토대로 그리드상의 방향을 계산해 반환합니다.
+    /// </summary>
     private Vector3Int GetDragDirection(Vector2 dragVector)
     {
         if (Mathf.Abs(dragVector.x) > Mathf.Abs(dragVector.y))
@@ -68,34 +67,22 @@ public class CandyDragHandler : MonoBehaviour
         }
     }
 
-    private Vector2 GetCandyGridPosition(Candy draggedCandy)
-    {
-        for (int x = gameBoardManager.Bounds.xMin; x <= gameBoardManager.Bounds.xMax; ++x)
-        {
-            for (int y = gameBoardManager.Bounds.yMin; y <= gameBoardManager.Bounds.yMax; ++y)
-            {
-                var idx = new Vector3Int(x, y);
-
-                if (gameBoardCells[idx].ContainingCandy == draggedCandy)
-                {
-                    return new Vector2(idx.x, idx.y);
-                }
-            }
-        }
-        return Vector2.negativeInfinity;
-    }
-
+    /// <summary>
+    /// 유효한 그리드 인덱스인지 확인하는 메서드입니다.
+    /// </summary>
     private bool IsValidGridPosition(Vector3Int idx)
     {
         return idx.x >= gameBoardManager.Bounds.xMin && idx.x <= gameBoardManager.Bounds.xMax &&
                idx.y >= gameBoardManager.Bounds.yMin && idx.y <= gameBoardManager.Bounds.yMax;
     }
 
+    /// <summary>
+    /// GameBoardManager에게 캔디 스왑을 요청하는 메서드입니다.
+    /// </summary>
     private void SwapCandies(Vector3Int idx1, Vector3Int idx2)
     {
         isSwapping = true;
 
-        //gameBoardManager.SwapCandies(idx1, idx2);
         gameBoardManager.StartSwap(idx1, idx2);
 
         isSwapping = false;

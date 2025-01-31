@@ -1,9 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 스테이지 선택 화면에 표시되는 스테이지 패널입니다.
+/// 각 스테이지의 정보를 유저에게 표시해줍니다.
+/// </summary>
 public class StagePanel : MonoBehaviour
 {
     public TextMeshProUGUI StageLevelTextUI;
@@ -27,8 +29,7 @@ public class StagePanel : MonoBehaviour
 
         BGImageUI.sprite = BGSprites[stageLevel % 2];
 
-        //
-        // 레벨 팝업이 열린 다음 씬 이동하도록!
+        // 클릭시 스테이지 레벨의 상세 정보를 나타내는 팝업을 노출시킵니다
         StageButton.AddClickListener(() => {
             StageSelectSceneManager.Instance.PopupLevelPanelController.Show();
             StageSelectSceneManager.Instance.PopupLevelPanelController.InitPopup(stageLevel, stageName, starScore);

@@ -2,15 +2,19 @@ using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+
 /// <summary>
-/// 클라이언트의 정보를 담는 서버를 구축하기 전까지 사용하는 스크립트입니다.
-/// 로컬에 클라이언트의 정보를 저장해줍니다.
+/// 게임 데이터를 로컬에 저장하고 로드해주는 클래스입니다.
 /// </summary>
 public static class SaveSystem
 {
     // candy는 세이브 파일 자료형.
     private static string path = Application.persistentDataPath + $"/playerSaveData.candy";
 
+    /// <summary>
+    /// 플레이어 데이터 저장
+    /// </summary>
+    /// <param name="playerData"></param>
     public static void SavePlayerData(PlayerData playerData)
     {
         using (FileStream fileStream = new FileStream(path, FileMode.Create))
@@ -28,6 +32,10 @@ public static class SaveSystem
         }
     }
 
+    /// <summary>
+    /// 사운드 데이터 저장
+    /// </summary>
+    /// <param name="soundVolumeData"></param>
     public static void SaveSoundVolumeData(SoundVolumeData soundVolumeData)
     {
         using (FileStream fileStream = new FileStream(path, FileMode.Create))
@@ -45,6 +53,10 @@ public static class SaveSystem
         }
     }
 
+    /// <summary>
+    /// 데이터 로드시에 사용하는 메서드입니다. 
+    /// 세이브 파일이 손상되었을 경우 자동으로 파일을 삭제시킵니다.
+    /// </summary>
     public static T LoadData<T>() where T : class
     {
         if (!File.Exists(path))

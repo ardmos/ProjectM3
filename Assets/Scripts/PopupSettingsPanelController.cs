@@ -1,8 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// 스테이지 선택씬에 있는 설정팝업입니다.
+/// 사운드 관련 설정을 조정할 수 있도록 합니다.
+/// </summary>
 public class PopupSettingsPanelController : MonoBehaviour
 {
     public CustomClickSoundButton CloseButton;

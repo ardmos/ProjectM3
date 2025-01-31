@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 스테이지씬의 타겟 시스템을 관리하는 매니저 클래스입니다.
+/// 타겟 생성과 각 타겟 클리어 처리, 모든 타겟 클리어시 게임 승리 처리를 담당합니다. 
+/// </summary>
 public class TargetCountManager : MonoBehaviour
 {
     public RectTransform TargetGrid;
@@ -15,6 +19,9 @@ public class TargetCountManager : MonoBehaviour
         InitTargetPanel();
     }
 
+    /// <summary>
+    /// 현재 씬 기획에 따라 타겟 생성
+    /// </summary>
     private void InitTargetPanel()
     {
         foreach (TargetData target in LevelData.Instance.TargetList)
@@ -25,6 +32,11 @@ public class TargetCountManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 타겟 클리어 현황을 확인해주는 메서드입니다.
+    /// 타겟이 클리어상태가 아니면 타겟 카운트를 감소시킵니다. 
+    /// 모든 타겟이 클리어 상태면 GameManager에게 스테이지 승리 요청을 보냅니다.
+    /// </summary>
     public void CheckTargetClear(List<Candy> poppedCandies)
     {
         foreach (Candy candy in poppedCandies)

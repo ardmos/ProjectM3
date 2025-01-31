@@ -1,3 +1,6 @@
+/// <summary>
+/// 세이브 시스템에서 사용하는 사운드 설정 정보 클래스입니다.
+/// </summary>
 [System.Serializable]
 public class SoundVolumeData
 {

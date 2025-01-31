@@ -1,12 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-
 /// <summary>
 /// 디자인 레벨에서만 사용되는 타일입니다. 
-/// 런타임에는 GameBoardManager에게 이 타일이 캔디를 배치하는 장소라는걸 알리고, GameBoardManager는 이 게임오브젝트를 파괴합니다.
+/// 런타임에 GameBoardManager에게 이 타일이 캔디를 배치하는 장소라는걸 알립니다.
 /// </summary>
 [CreateAssetMenu(fileName = "CandyPlacerTile", menuName = "2D Match/Tile/Candy Placer")]
 public class CandyPlacerTile : TileBase
@@ -29,13 +26,6 @@ public class CandyPlacerTile : TileBase
 #endif
 
         GameBoardManager.RegisterCell(position, PlacedCandy);
-
-        // Remove the tile from the Tilemap after registering it
-/*        Tilemap map = tilemap.GetComponent<Tilemap>();
-        if (map != null)
-        {
-            map.SetTile(position, null); // Remove the tile at this position
-        }*/
 
         return base.StartUp(position, tilemap, go);
     }

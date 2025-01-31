@@ -1,10 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
+/// <summary>
+/// 게임씬에서 플레이어의 스코어 계산을 담당하는 매니저입니다.
+/// </summary>
 public class ScoreManager : MonoBehaviour
 {
     public TextMeshProUGUI CurrentScoreText;
@@ -20,13 +20,15 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 스코어 추가
+    /// </summary>
     public void AddScore(int value)
     {
         currentScore += value;
         CheckStarScore();
     }
-
-    public void AddScoreByCandy(List<Candy> poppedCandies)
+    public void AddScore(List<Candy> poppedCandies)
     {
         foreach (Candy poppedCandy in poppedCandies)
         {
@@ -38,6 +40,9 @@ public class ScoreManager : MonoBehaviour
         CheckStarScore();
     }
 
+    /// <summary>
+    /// 획득한 점수를 기반으로 획득 가능한 별 점수를 계산해주는 메서드입니다.
+    /// </summary>
     private void CheckStarScore()
     {
         int[] targetScores = LevelData.Instance.TargetScore;

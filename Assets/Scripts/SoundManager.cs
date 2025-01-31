@@ -1,7 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 사운드 관련 로직을 관리하는 사운드 매니저입니다.
+/// </summary>
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance { get; private set; }
@@ -46,6 +48,10 @@ public class SoundManager : MonoBehaviour
         PlayBGM(BGM.TitleScene);
     }
 
+    /// <summary>
+    /// 사운드 설정 데이터를 초기화하는 메서드입니다. 
+    /// 보통은 세이브시스템을 통해 로드하는데, 게임을 처음 하는 경우처럼 로드할 정보가 없는 경우 새로 생성합니다.
+    /// </summary>
     private void InitSoundVolumeData()
     {
         var soundVolumeData = SaveSystem.LoadData<SoundVolumeData>();
@@ -62,6 +68,9 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 배경음악 재생
+    /// </summary>
     public void PlayBGM(BGM bgmName)
     {
         audioSourceBGM.Stop();
@@ -69,6 +78,9 @@ public class SoundManager : MonoBehaviour
         audioSourceBGM.Play();
     }
 
+    /// <summary>
+    /// 효과음 재생
+    /// </summary>
     public void PlaySFX(SFX sfxName)
     {
         audioSourceSFX.Stop();
@@ -80,6 +92,10 @@ public class SoundManager : MonoBehaviour
             audioSourceSFX.Play();
     }
 
+    /// <summary>
+    /// 특별히 소리가 큰 GenerateCandySFX 에셋이 재생될때에만 볼륨을 잠시 낮춰주는 메서드입니다.
+    /// 재생이 종료되면 다시 원래 볼륨으로 복구합니다.
+    /// </summary>
     private IEnumerator GenerateCandySFXVolumeControl()
     {
         float originalVolume = audioSourceSFX.volume;
@@ -89,12 +105,19 @@ public class SoundManager : MonoBehaviour
         audioSourceSFX.volume = originalVolume;
     }
 
+
+    /// <summary>
+    /// 배경음 볼륨 업데이트
+    /// </summary>
     public void UpdateBGMVolume(float volume)
     {
         audioSourceBGM.volume = volume;
         SaveSystem.SaveSoundVolumeData(new SoundVolumeData(GetBGMVolume(), GetSFXVolume()));
     }
 
+    /// <summary>
+    /// 효과음 볼륨 업데이트
+    /// </summary>
     public void UpdateSFXVolume(float volume)
     {
         audioSourceSFX.volume = volume;

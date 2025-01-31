@@ -1,9 +1,10 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// 게임씬에서 게임 패배시 노출되는 팝업입니다
+/// </summary>
 public class PopupLosePanelController : MonoBehaviour
 {
     public TextMeshProUGUI TitleText;

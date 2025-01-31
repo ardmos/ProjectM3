@@ -1,3 +1,6 @@
+/// <summary>
+/// 세이브시스템에서 사용하는 세이브 데이터 클래스입니다.
+/// </summary>
 [System.Serializable]
 public class SaveData
 {
