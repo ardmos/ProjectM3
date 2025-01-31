@@ -80,6 +80,8 @@ public class GameBoardManager : MonoBehaviour
 
     private IEnumerator RunStateMachine()
     {
+        if (GameManager.Instance.GetGameState() != GameManager.State.Play) yield break;
+
         switch (state)
         {
             case State.Init:
@@ -611,6 +613,8 @@ public class GameBoardManager : MonoBehaviour
 
         if (startingCandy != null)
             Instance.NewCandyAt(cellPosition, startingCandy);
+
+
     }
 
     // 그리드 참조
