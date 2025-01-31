@@ -30,6 +30,13 @@ public class CandyPlacerTile : TileBase
 
         GameBoardManager.RegisterCell(position, PlacedCandy);
 
+        // Remove the tile from the Tilemap after registering it
+/*        Tilemap map = tilemap.GetComponent<Tilemap>();
+        if (map != null)
+        {
+            map.SetTile(position, null); // Remove the tile at this position
+        }*/
+
         return base.StartUp(position, tilemap, go);
     }
 }

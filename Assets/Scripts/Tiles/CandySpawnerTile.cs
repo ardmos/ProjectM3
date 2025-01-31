@@ -20,9 +20,15 @@ public class CandySpawnerTile : TileBase
             return false;
 #endif
 
-        //This tile is only used in editor to help design the level. At runtime, we notify the board that this tile is
-        //a place for a gem. The Board will take care of creating a gem there.
+        // Register the spawner position
         GameBoardManager.RegisterSpawner(position);
+
+        // Remove the tile from the Tilemap after registering it
+/*        Tilemap map = tilemap.GetComponent<Tilemap>();
+        if (map != null)
+        {
+            map.SetTile(position, null); // Remove the tile at this position
+        }*/
 
         return base.StartUp(position, tilemap, go);
     }

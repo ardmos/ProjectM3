@@ -28,10 +28,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-    }
-
-    private void Start()
-    {
         UpdateState(State.Play);
     }
 
@@ -59,6 +55,7 @@ public class GameManager : MonoBehaviour
                 ChageLeftMovesToScore();
                 // 게임 결과 세이브
                 PlayerDataManager.Instance.UpdatePlayerStageClearData(LevelData.Instance.Level,ScoreManager.StarScore);
+
                 OnWin.Invoke();
                 break;
             case State.Lose:
