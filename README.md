@@ -1,7 +1,6 @@
 
 #
-![2](https://github.com/user-attachments/assets/2a2cef93-0393-4a35-9d22-6646111a1996)
-
+<img src="https://github.com/user-attachments/assets/2a2cef93-0393-4a35-9d22-6646111a1996"  width="200" height="633"/>
 ![3](https://github.com/user-attachments/assets/45ececc0-942b-4db5-bcac-5a05ca0f3a22)
 
 ![4](https://github.com/user-attachments/assets/3cba3fbe-9ac2-4181-ad9b-6dcc885404e3)
