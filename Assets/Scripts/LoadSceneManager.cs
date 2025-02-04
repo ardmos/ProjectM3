@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -43,10 +44,18 @@ public class LoadSceneManager : MonoBehaviour
     /// </summary>
     public void Load(Scene targetScene)
     {
-        StartCoroutine(FadeAndLoadScene(targetScene.ToString()));
-
-        PlayBGM(targetScene);
-        BannerAdHandler(targetScene);
+        try
+        {
+            StartCoroutine(FadeAndLoadScene(targetScene.ToString()));
+            PlayBGM(targetScene);
+            //BannerAdHandler(targetScene);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"씬 로드중 문제가 발생했습니다. {e.Message}");
+            Debug.LogException(e);
+            AndroidToast.ShowToast(e.Message);
+        }
     }
 
     /// <summary>
