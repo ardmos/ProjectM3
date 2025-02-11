@@ -46,9 +46,7 @@ public class LoadSceneManager : MonoBehaviour
     {
         try
         {
-            StartCoroutine(FadeAndLoadScene(targetScene.ToString()));
-            PlayBGM(targetScene);
-            //BannerAdHandler(targetScene);
+            StartCoroutine(FadeAndLoadScene(targetScene));
         }
         catch (Exception e)
         {
@@ -68,7 +66,6 @@ public class LoadSceneManager : MonoBehaviour
         {
             case Scene.TitleScene:
             case Scene.StageSelectScene:
-                BannerAdManager.Instance.HideBannerAd();
                 break;
             default:
                 // 게임씬
@@ -98,18 +95,26 @@ public class LoadSceneManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 페이드 효과를 재생해주는 메서드입니다.
+    /// 페이드 효과를 재생하고 씬을 로드해주는 메서드입니다.
     /// </summary>
-    private IEnumerator FadeAndLoadScene(string sceneName)
+    private IEnumerator FadeAndLoadScene(Scene targetScene)
     {
+        // 페이드 효과를 위한 배너광고 비활성화
+        BannerAdManager.Instance.HideBannerAd();
+
         // 페이드 아웃
         yield return StartCoroutine(Fade(1f));
 
         // 씬 로드
-        SceneManager.LoadScene(sceneName);
+        SceneManager.LoadScene(targetScene.ToString());
 
         // 페이드 인
         yield return StartCoroutine(Fade(0f));
+
+        // 배경음 설정
+        PlayBGM(targetScene);
+        // 배너 광고 설정
+        BannerAdHandler(targetScene);
     }
 
     private IEnumerator Fade(float targetAlpha)

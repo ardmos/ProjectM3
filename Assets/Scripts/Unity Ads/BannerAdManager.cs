@@ -74,6 +74,8 @@ public class BannerAdManager : MonoBehaviour
         {
             Debug.LogError("배너가 로드되지 않았습니다.");
         }
+        else
+            Debug.Log("배너를 표시합니다");
 
         // Set up options to notify the SDK of show events:
         BannerOptions options = new BannerOptions
@@ -92,11 +94,24 @@ public class BannerAdManager : MonoBehaviour
     /// </summary>
     public void HideBannerAd()
     {
+        Debug.Log("배너를 숨깁니다");
+
         // Hide the banner:
         Advertisement.Banner.Hide();
     }
 
-    private void OnBannerClicked() { }
-    private void OnBannerShown() { }
-    private void OnBannerHidden() { }
+    private void OnBannerClicked()
+    {
+        Debug.Log("배너가 클릭되었습니다.");
+    }
+
+    private void OnBannerShown()
+    {
+        Debug.Log("배너가 표시되었습니다.");
+    }
+
+    private void OnBannerHidden()
+    {
+        Debug.Log("배너가 숨겨졌습니다.");
+    }
 }
