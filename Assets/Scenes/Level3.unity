@@ -8917,8 +8917,8 @@ MonoBehaviour:
     Count: 3
   - CandyType: 8
     Count: 5
-  TargetScore: 64000000a000000058020000
-  MoveMaxCount: 30
+  TargetScore: 64000000a0000000c8000000
+  MoveMaxCount: 40
   CandyPrefabs:
   - {fileID: -948302693355730056, guid: 36a7f26c2e11ea546bd9e9c5e8f0e167, type: 3}
   - {fileID: 4714808536152932748, guid: a9400cd1e50299f44972a53990a88d38, type: 3}

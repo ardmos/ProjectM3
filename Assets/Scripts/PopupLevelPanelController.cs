@@ -20,7 +20,16 @@ public class PopupLevelPanelController : MonoBehaviour
     public void InitPopup(int stageLevel, string stageName, int starScore)
     {
         TitleTextUI.text = stageName;
-        TargetScoreTextUI.text = $"{stageLevel*200}";
+
+        if(stageLevel == 3)
+        {
+            TargetScoreTextUI.text = $"{200}";
+        }
+        else
+        {
+            TargetScoreTextUI.text = $"{stageLevel * 200}";
+        }
+
 
         for (int i = 0; i < StarObjects.Length; i++)
         {
